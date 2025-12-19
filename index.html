@@ -1,0 +1,276 @@
+<!-- 
+  使用說明 (GitHub Pages 部署):
+  1. 在 GitHub 建立一個新儲存庫 (Repository)。
+  2. 將此代碼儲存為 index.html 並上傳至儲存庫。
+  3. 進入 Settings > Pages，將 Branch 設為 main 並儲存。
+  4. 取得 GitHub 給您的網址 (例如 https://username.github.io/repo/)。
+  5. 在 LINE Developers Console 的 LIFF 設定中：
+     - Endpoint URL: 填入上述 GitHub 網址。
+     - Scopes: 勾選 profile, shareTargetPicker。
+-->
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LINE Flex JSON 推送器</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f8fafc; }
+        .json-editor { font-family: 'Fira Code', 'Cascadia Code', monospace; }
+        .preview-area { background-color: #748da6; min-height: 400px; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+        .status-off { background-color: #ef4444; box-shadow: 0 0 8px #ef4444; }
+        .status-on { background-color: #22c55e; box-shadow: 0 0 8px #22c55e; }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden text-slate-900">
+
+    <!-- Header -->
+    <header class="h-14 bg-white border-b border-slate-200 flex items-center justify-between px-6 shrink-0 shadow-sm z-10">
+        <div class="flex items-center gap-3">
+            <div class="bg-emerald-500 p-1.5 rounded-lg text-white">
+                <i data-lucide="send" class="w-5 h-5"></i>
+            </div>
+            <div>
+                <h1 class="font-bold text-slate-800 flex items-center gap-2">
+                    Flex JSON 推送器
+                    <span id="liff-status-dot" class="status-dot status-off" title="LIFF 狀態"></span>
+                </h1>
+                <p id="liff-user-name" class="text-[10px] text-slate-400 -mt-1">尚未登入 LINE</p>
+            </div>
+        </div>
+        <div class="flex items-center gap-4">
+            <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
+                <span class="text-[10px] font-bold text-slate-500 uppercase">LIFF ID</span>
+                <input type="text" id="liff-id-input" placeholder="填入 ID" class="bg-transparent text-xs w-32 outline-none border-none focus:ring-0">
+            </div>
+            <button id="btn-login" onclick="handleLogin()" class="hidden bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2">
+                <i data-lucide="log-in" class="w-4 h-4"></i> 登入 LINE
+            </button>
+            <button id="btn-share" onclick="shareTargetPicker()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-md">
+                <i data-lucide="share-2" class="w-4 h-4"></i> 選擇好友傳送
+            </button>
+        </div>
+    </header>
+
+    <main class="flex-1 flex overflow-hidden">
+        <!-- 左側：JSON 輸入區 -->
+        <section class="w-1/2 flex flex-col border-r border-slate-200 bg-white">
+            <div class="p-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                    <i data-lucide="code" class="w-3.5 h-3.5"></i> 貼上 JSON 代碼
+                </span>
+                <div class="flex gap-2">
+                    <button onclick="formatJSON()" class="text-[10px] bg-white border border-slate-300 px-2 py-1 rounded hover:bg-slate-50 transition font-bold">格式化 JSON</button>
+                </div>
+            </div>
+            <textarea id="json-input" class="flex-1 p-4 text-sm json-editor outline-none resize-none custom-scrollbar" placeholder='在此貼上 Flex Message 的 JSON 物件...' spellcheck="false"></textarea>
+        </section>
+
+        <!-- 右側：即時預覽與 GitHub 指南 -->
+        <section class="w-1/2 flex flex-col bg-slate-100">
+            <div class="p-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
+                <span class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> 預覽與設定
+                </span>
+                <button onclick="toggleGuide()" class="text-[10px] text-blue-600 hover:underline">部署教學</button>
+            </div>
+            
+            <div class="flex-1 overflow-y-auto preview-area p-8 flex flex-col items-center custom-scrollbar">
+                
+                <!-- GitHub 部署診斷 -->
+                <div class="w-full max-w-[420px] bg-white rounded-xl p-5 mb-6 shadow-lg border-2 border-blue-100">
+                    <h3 class="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
+                        <i data-lucide="globe" class="w-4 h-4"></i> 當前網址偵測
+                    </h3>
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="detected-url" readonly class="flex-1 text-[10px] p-2 bg-slate-50 border border-slate-200 rounded font-mono text-slate-400 outline-none">
+                        <button onclick="copyUrl()" class="px-3 py-1 bg-blue-500 text-white text-[10px] font-bold rounded hover:bg-blue-600 transition shrink-0">複製</button>
+                    </div>
+                    <p class="text-[10px] text-slate-400 italic">※ 請將此網址設為 LINE Console 的 Endpoint URL。</p>
+                </div>
+
+                <!-- 預覽容器 -->
+                <div id="preview-container" class="w-full max-w-[350px] shadow-2xl rounded-2xl overflow-hidden bg-white">
+                    <div class="p-8 text-center text-slate-400 italic text-sm">
+                        JSON 預覽將顯示於此
+                    </div>
+                </div>
+                
+                <!-- GitHub 指南 -->
+                <div id="github-guide" class="mt-6 w-full max-w-[420px] bg-slate-800 text-white rounded-xl p-5 shadow-xl">
+                    <h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-blue-400">
+                        <i data-lucide="github" class="w-4 h-4"></i> GitHub Pages 部署步驟
+                    </h3>
+                    <ul class="text-[11px] space-y-3 text-slate-300 list-decimal ml-4 leading-relaxed">
+                        <li>在 GitHub 建立 Repository 並命名。</li>
+                        <li>新增檔案 <b>index.html</b> 並貼入本頁代碼。</li>
+                        <li>進入 Settings > Pages，將 Branch 設為 <b>main</b> 並儲存。</li>
+                        <li>等待 1 分鐘後，存取 GitHub 提供給您的網址。</li>
+                        <li><b>最重要：</b> 將 GitHub 網址複製並更新到 LINE 的 Endpoint URL。</li>
+                    </ul>
+                </div>
+
+                <div id="error-msg" class="mt-4 px-4 py-2 bg-red-100 text-red-600 text-xs rounded-lg hidden border border-red-200"></div>
+            </div>
+        </section>
+    </main>
+
+    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-xl text-sm font-medium transform translate-y-24 opacity-0 transition-all duration-300 z-50"></div>
+
+    <script>
+        lucide.createIcons();
+
+        const jsonInput = document.getElementById('json-input');
+        const previewContainer = document.getElementById('preview-container');
+        const errorMsg = document.getElementById('error-msg');
+        const liffIdInput = document.getElementById('liff-id-input');
+        const statusDot = document.getElementById('liff-status-dot');
+        const userNameText = document.getElementById('liff-user-name');
+        const btnLogin = document.getElementById('btn-login');
+        const githubGuide = document.getElementById('github-guide');
+        const detectedUrlInput = document.getElementById('detected-url');
+
+        let isLiffReady = false;
+
+        const defaultJSON = {
+          "type": "bubble",
+          "body": {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              { "type": "text", "text": "GitHub Pages 測試", "weight": "bold", "size": "xl" },
+              { "type": "text", "text": "穩定推播不中斷", "size": "sm", "color": "#666666", "margin": "md" }
+            ]
+          }
+        };
+
+        window.onload = () => {
+            detectedUrlInput.value = window.location.href.split('?')[0];
+            
+            const savedLiffId = localStorage.getItem('my_liff_id_github');
+            if (savedLiffId) {
+                liffIdInput.value = savedLiffId;
+                initLIFF(savedLiffId);
+            }
+            jsonInput.value = JSON.stringify(defaultJSON, null, 2);
+            updatePreview();
+        };
+
+        async function initLIFF(id) {
+            try {
+                await liff.init({ liffId: id });
+                isLiffReady = true;
+                updateAuthUI();
+                showToast("LIFF 初始化成功");
+            } catch (err) {
+                isLiffReady = false;
+                console.error("Init Error:", err);
+                showToast("初始化失敗：請檢查 ID 與 Endpoint 網址");
+            }
+        }
+
+        function updateAuthUI() {
+            if (liff.isLoggedIn()) {
+                statusDot.className = "status-dot status-on";
+                btnLogin.classList.add('hidden');
+                liff.getProfile().then(profile => {
+                    userNameText.innerText = `登入者：${profile.displayName}`;
+                });
+            } else {
+                statusDot.className = "status-dot status-off";
+                btnLogin.classList.remove('hidden');
+                userNameText.innerText = "尚未登入 LINE";
+            }
+        }
+
+        function handleLogin() {
+            if (!isLiffReady) {
+                showToast("請先完成初始化");
+                return;
+            }
+            liff.login();
+        }
+
+        liffIdInput.addEventListener('blur', () => {
+            const id = liffIdInput.value.trim();
+            if (id) {
+                localStorage.setItem('my_liff_id_github', id);
+                initLIFF(id);
+            }
+        });
+
+        async function shareTargetPicker() {
+            if (!isLiffReady) {
+                showToast("LIFF 尚未就緒");
+                return;
+            }
+            if (!liff.isLoggedIn()) {
+                handleLogin();
+                return;
+            }
+
+            try {
+                const flexContents = JSON.parse(jsonInput.value.trim());
+                const result = await liff.shareTargetPicker([
+                    { "type": "flex", "altText": "您收到了一則訊息", "contents": flexContents }
+                ]);
+                if (result) showToast("訊息已發送！");
+            } catch (err) {
+                showToast("發送失敗：JSON 格式錯誤");
+            }
+        }
+
+        function updatePreview() {
+            try {
+                const data = JSON.parse(jsonInput.value);
+                errorMsg.classList.add('hidden');
+                previewContainer.innerHTML = `
+                    <div class="bg-white p-6">
+                        <div class="p-4 bg-blue-50 rounded-lg border border-dashed border-blue-300 text-center">
+                            <p class="text-xs text-blue-600 font-bold mb-1">語法正確</p>
+                            <p class="text-[10px] text-blue-500 uppercase">類型: ${data.type || '未知'}</p>
+                        </div>
+                    </div>
+                `;
+            } catch (e) {
+                errorMsg.innerText = "語法錯誤: " + e.message;
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
+        function formatJSON() {
+            try {
+                const obj = JSON.parse(jsonInput.value);
+                jsonInput.value = JSON.stringify(obj, null, 2);
+            } catch (e) { showToast("語法有誤"); }
+        }
+
+        function toggleGuide() {
+            githubGuide.classList.toggle('hidden');
+        }
+
+        function copyUrl() {
+            detectedUrlInput.select();
+            document.execCommand('copy');
+            showToast("網址已複製");
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 2500);
+        }
+
+        jsonInput.addEventListener('input', updatePreview);
+    </script>
+</body>
+</html>
