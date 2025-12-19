@@ -1,17 +1,9 @@
-<!-- 
-  使用說明 (GitHub Pages 部署):
-  1. 在 GitHub 建立一個新儲存庫 (Repository)。
-  2. 將此代碼儲存為 index.html 並上傳至儲存庫。
-  3. 進入 Settings > Pages，將 Branch 設為 main 並儲存。
-  4. 取得 GitHub 給您的網址。
-  5. 在 LINE Developers Console 的 LIFF 設定中將 Endpoint URL 更新為 GitHub 網址。
--->
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LINE Flex JSON 推送器 Pro</title>
+    <title>LINE Flex Message Sender Pro</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -25,97 +17,96 @@
 
         body { 
             font-family: 'Noto Sans TC', sans-serif; 
-            background-color: #f1f5f9; 
+            background-color: #f8fafc; 
+            height: 100vh;
+            overflow: hidden;
         }
 
         .json-editor { 
             font-family: 'Fira Code', monospace; 
-            line-height: 1.6;
+            line-height: 1.5;
+            tab-size: 2;
         }
 
-        /* 模擬 LINE 手機視窗 */
-        .phone-container {
-            width: 360px;
-            height: 640px;
+        /* 手機模擬器樣式優化 */
+        .phone-frame {
+            width: 340px;
+            height: 600px;
             background-color: var(--line-chat-bg);
-            border-radius: 36px;
-            border: 8px solid #1e293b;
+            border-radius: 32px;
+            border: 10px solid #1e293b;
             position: relative;
-            overflow: hidden;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.3);
             display: flex;
             flex-direction: column;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
         }
 
-        .phone-header {
-            height: 40px;
-            background-color: rgba(0,0,0,0.1);
+        .phone-top {
+            height: 35px;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 20px;
         }
 
-        .phone-content {
+        .phone-screen {
             flex: 1;
-            padding: 15px;
+            padding: 12px;
             overflow-y: auto;
+            scrollbar-width: none;
         }
+        .phone-screen::-webkit-scrollbar { display: none; }
 
-        /* Flex 渲染基礎樣式 */
+        /* Flex Bubble 基礎渲染 */
         .flex-bubble {
-            background-color: white;
-            border-radius: 16px;
+            background-color: #ffffff;
+            border-radius: 14px;
             overflow: hidden;
             width: 100%;
             display: flex;
             flex-direction: column;
-            font-size: 14px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
 
         .flex-box-vertical { display: flex; flex-direction: column; }
         .flex-box-horizontal { display: flex; flex-direction: row; }
         
-        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
+        .status-dot { width: 10px; height: 10px; border-radius: 50%; transition: all 0.3s; }
+        .status-on { background-color: var(--line-green); box-shadow: 0 0 10px var(--line-green); }
+        .status-off { background-color: #ef4444; box-shadow: 0 0 10px #ef4444; }
 
-        /* 狀態點動畫 */
-        .status-dot { width: 10px; height: 10px; border-radius: 50%; }
-        .status-on { background-color: var(--line-green); box-shadow: 0 0 8px var(--line-green); }
-        .status-off { background-color: #ef4444; box-shadow: 0 0 8px #ef4444; }
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
     </style>
 </head>
-<body class="h-screen flex flex-col overflow-hidden text-slate-900">
+<body class="flex flex-col">
 
-    <!-- 頂部導覽列 -->
-    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 z-30 shadow-sm">
+    <!-- 頂部導航列 -->
+    <header class="h-16 bg-white border-b border-slate-200 flex items-center justify-between px-8 shrink-0 z-30">
         <div class="flex items-center gap-4">
-            <div class="bg-[#06C755] p-2 rounded-xl text-white shadow-lg shadow-emerald-200">
-                <i data-lucide="send-native" class="w-6 h-6"></i>
+            <div class="bg-[#06C755] p-2 rounded-xl text-white">
+                <i data-lucide="send" class="w-6 h-6"></i>
             </div>
             <div>
-                <h1 class="font-bold text-lg text-slate-800 tracking-tight flex items-center gap-2">
-                    Flex Message Sender Pro
+                <h1 class="font-bold text-slate-800 tracking-tight flex items-center gap-2">
+                    Flex Sender Pro
                     <span id="liff-status-dot" class="status-dot status-off"></span>
                 </h1>
-                <p id="liff-user-info" class="text-xs text-slate-400 font-medium tracking-wide uppercase">未登入系統</p>
+                <p id="liff-user-name" class="text-[10px] text-slate-400 font-bold uppercase tracking-tighter">OFFLINE</p>
             </div>
         </div>
 
         <div class="flex items-center gap-4">
-            <!-- LIFF ID 輸入框 -->
-            <div class="group flex items-center gap-3 bg-slate-50 px-5 py-2 rounded-xl border border-slate-200 transition-all focus-within:ring-4 focus-within:ring-emerald-500/10 focus-within:border-emerald-500">
-                <i data-lucide="key" class="w-4 h-4 text-slate-400 group-focus-within:text-emerald-500"></i>
-                <input type="text" id="liff-id-input" placeholder="請貼入 LIFF ID (200xxxxxxx-xxxxxxxx)" 
-                       class="bg-transparent text-sm w-80 lg:w-[450px] outline-none border-none font-mono text-slate-600 placeholder-slate-300">
+            <!-- 加寬後的 ID 輸入框 -->
+            <div class="flex items-center gap-3 bg-slate-50 px-4 py-2 rounded-xl border border-slate-200 transition-all focus-within:ring-2 focus-within:ring-emerald-500 focus-within:bg-white">
+                <i data-lucide="key" class="w-4 h-4 text-slate-400"></i>
+                <input type="text" id="liff-id-input" placeholder="貼入 LIFF ID (例如 200xxxxxxx-xxxxxxxx)" 
+                       class="bg-transparent text-sm w-[400px] outline-none border-none font-mono text-slate-700 placeholder-slate-300">
             </div>
 
-            <div class="h-8 w-px bg-slate-200 mx-2"></div>
-
-            <button id="btn-login" onclick="handleLogin()" class="hidden bg-slate-800 hover:bg-slate-700 text-white px-5 py-2.5 rounded-xl text-sm font-bold transition flex items-center gap-2 shadow-lg shadow-slate-200">
-                <i data-lucide="log-in" class="w-4 h-4"></i> 登入
+            <button id="btn-login" onclick="handleLogin()" class="hidden bg-slate-800 hover:bg-slate-700 text-white px-6 py-2 rounded-xl text-sm font-bold transition shadow-md">
+                登入
             </button>
-            <button id="btn-share" onclick="shareTargetPicker()" class="bg-[#06C755] hover:bg-[#05b14c] text-white px-6 py-2.5 rounded-xl text-sm font-black transition-all transform hover:scale-105 active:scale-95 flex items-center gap-2 shadow-lg shadow-emerald-200">
+            <button id="btn-share" onclick="shareTargetPicker()" class="bg-[#06C755] hover:bg-[#05b14c] text-white px-8 py-2 rounded-xl text-sm font-black transition-all transform active:scale-95 shadow-lg flex items-center gap-2">
                 <i data-lucide="share-2" class="w-4 h-4"></i> 發送訊息
             </button>
         </div>
@@ -123,142 +114,84 @@
 
     <main class="flex-1 flex overflow-hidden">
         
-        <!-- 左側：編輯區 -->
-        <section class="flex-1 flex flex-col bg-white border-r border-slate-200">
+        <!-- 左側：編輯器 -->
+        <section class="flex-1 flex flex-col bg-white">
             <div class="p-4 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <span class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <i data-lucide="file-json" class="w-4 h-4"></i> JSON Editor
+                <div class="flex items-center gap-6">
+                    <span class="text-xs font-black text-slate-400 uppercase tracking-widest flex items-center gap-2">
+                        <i data-lucide="code" class="w-4 h-4"></i> JSON Editor
                     </span>
-                    <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5 shadow-sm">
-                        <span class="text-[10px] font-bold text-slate-400 uppercase">標題</span>
-                        <input type="text" id="alt-text-input" value="您收到了一則精選訊息" class="text-xs outline-none border-none w-48 font-medium">
+                    <div class="flex items-center gap-2 bg-white border border-slate-200 rounded-lg px-3 py-1.5">
+                        <span class="text-[10px] font-bold text-slate-400 uppercase">預覽文字</span>
+                        <input type="text" id="alt-text-input" value="您收到了一則新訊息" class="text-xs outline-none border-none w-48 font-bold">
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="formatJSON()" class="px-3 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition flex items-center gap-1.5">
-                        <i data-lucide="wand-2" class="w-3.5 h-3.5"></i> 格式化
-                    </button>
-                </div>
+                <button onclick="formatJSON()" class="px-4 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-bold text-slate-600 hover:bg-slate-50 transition flex items-center gap-2">
+                    <i data-lucide="sparkles" class="w-3.5 h-3.5"></i> 格式化
+                </button>
             </div>
-            <textarea id="json-input" class="flex-1 p-6 text-sm json-editor outline-none resize-none custom-scrollbar bg-slate-50/30" placeholder='在此貼上您的 Flex Message JSON...' spellcheck="false"></textarea>
+            <textarea id="json-input" class="flex-1 p-6 text-sm json-editor outline-none resize-none custom-scrollbar bg-white" placeholder='請在此貼上 JSON 代碼...' spellcheck="false"></textarea>
         </section>
 
-        <!-- 右側：診斷與預覽區 -->
-        <section class="w-[500px] flex flex-col bg-[#f8fafc] overflow-y-auto custom-scrollbar p-8 items-center space-y-8">
+        <!-- 右側：手機預覽 -->
+        <section class="w-[450px] bg-slate-50 flex flex-col items-center justify-center p-6 border-l border-slate-200">
+            <div class="mb-6 flex flex-col items-center">
+                <span class="text-[10px] font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Device Preview</span>
+                <div class="phone-frame">
+                    <div class="phone-top">
+                        <div class="w-10 h-1 bg-white/10 rounded-full"></div>
+                    </div>
+                    <div class="phone-screen custom-scrollbar" id="phone-content">
+                        <!-- 渲染內容 -->
+                        <div id="flex-render-target" class="flex flex-col gap-4"></div>
+                    </div>
+                </div>
+            </div>
             
-            <div class="w-full">
-                <div class="flex items-center justify-between mb-4">
-                    <span class="text-xs font-black text-slate-400 uppercase tracking-[0.2em] flex items-center gap-2">
-                        <i data-lucide="smartphone" class="w-4 h-4"></i> Live Preview
-                    </span>
-                    <button onclick="toggleGuide()" class="text-xs font-bold text-emerald-600 hover:text-emerald-700 flex items-center gap-1">
-                        <i data-lucide="info" class="w-3.5 h-3.5"></i> 部署教學
-                    </button>
-                </div>
-
-                <!-- 手機模擬容器 -->
-                <div class="phone-container mx-auto">
-                    <div class="phone-header">
-                        <div class="w-12 h-1 bg-white/20 rounded-full"></div>
-                    </div>
-                    <div class="phone-content custom-scrollbar" id="phone-chat-area">
-                        <!-- 渲染出的 Flex 會出現在這裡 -->
-                        <div id="flex-render-target"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Endpoint 偵測 (緊湊版) -->
-            <div class="w-full bg-white p-5 rounded-2xl border border-slate-200 shadow-sm">
-                <h3 class="text-xs font-black text-slate-800 mb-3 flex items-center gap-2 uppercase tracking-widest">
-                    <i data-lucide="link" class="w-4 h-4 text-emerald-500"></i> Endpoint URL
-                </h3>
-                <div class="flex gap-2">
-                    <input type="text" id="detected-url" readonly class="flex-1 text-[10px] p-2.5 bg-slate-50 border border-slate-100 rounded-xl font-mono text-slate-400 outline-none">
-                    <button onclick="copyUrl()" class="px-4 py-2 bg-slate-100 text-slate-600 text-xs font-bold rounded-xl hover:bg-slate-200 transition">複製</button>
-                </div>
-            </div>
-
-            <!-- 指南 -->
-            <div id="github-guide" class="w-full bg-slate-800 text-white rounded-2xl p-6 shadow-xl hidden">
-                <h3 class="text-sm font-black mb-4 flex items-center gap-2 text-emerald-400 uppercase tracking-widest">
-                    <i data-lucide="check-circle" class="w-4 h-4"></i> 快速部署教學
-                </h3>
-                <ul class="text-xs space-y-4 text-slate-400 list-none">
-                    <li class="flex gap-3">
-                        <span class="bg-slate-700 text-white w-5 h-5 rounded-full flex items-center justify-center shrink-0">1</span>
-                        將此代碼存為 index.html 上傳至 GitHub 儲存庫。
-                    </li>
-                    <li class="flex gap-3">
-                        <span class="bg-slate-700 text-white w-5 h-5 rounded-full flex items-center justify-center shrink-0">2</span>
-                        進入 Settings > Pages 開啟 GitHub Pages。
-                    </li>
-                    <li class="flex gap-3">
-                        <span class="bg-slate-700 text-white w-5 h-5 rounded-full flex items-center justify-center shrink-0">3</span>
-                        將上方偵測到的 Endpoint URL 貼回 LINE 控制台。
-                    </li>
-                </ul>
+            <div class="text-[10px] text-slate-400 flex flex-col items-center gap-1 font-medium">
+                <p>Endpoint: <span id="current-url" class="font-mono text-slate-300">Detecting...</span></p>
+                <p>※ 請確保圖片網址皆為 HTTPS 且公開可存取</p>
             </div>
         </section>
     </main>
 
-    <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-900/90 backdrop-blur-md text-white px-8 py-3.5 rounded-2xl shadow-2xl text-sm font-bold transform translate-y-24 opacity-0 transition-all duration-500 z-50 flex items-center gap-3">
-        <i data-lucide="check-circle" class="w-5 h-5 text-emerald-400"></i>
-        <span id="toast-text"></span>
-    </div>
+    <div id="toast" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-8 py-3 rounded-2xl shadow-2xl text-sm font-bold transform translate-y-32 opacity-0 transition-all duration-500 z-50"></div>
 
     <script>
         lucide.createIcons();
 
         const jsonInput = document.getElementById('json-input');
         const flexRenderTarget = document.getElementById('flex-render-target');
-        const errorMsg = document.getElementById('error-msg');
         const liffIdInput = document.getElementById('liff-id-input');
         const statusDot = document.getElementById('liff-status-dot');
-        const userInfoText = document.getElementById('liff-user-info');
+        const userInfoText = document.getElementById('liff-user-name');
         const btnLogin = document.getElementById('btn-login');
-        const githubGuide = document.getElementById('github-guide');
-        const detectedUrlInput = document.getElementById('detected-url');
+        const currentUrlText = document.getElementById('current-url');
         const altTextInput = document.getElementById('alt-text-input');
 
         let isLiffReady = false;
 
-        // 預設範本
-        const welcomeTemplate = {
+        // 初始化範例 (清空大部分測試訊息，只留一個基本骨架)
+        const baseTemplate = {
             "type": "bubble",
-            "hero": {
-                "type": "image",
-                "url": "https://images.unsplash.com/photo-1614850523296-d8c1af93d400?w=800&q=80",
-                "size": "full",
-                "aspectRatio": "20:13",
-                "aspectMode": "cover"
-            },
             "body": {
                 "type": "box",
                 "layout": "vertical",
                 "contents": [
-                    { "type": "text", "text": "Flex 推送器就緒", "weight": "bold", "size": "xl" },
-                    { "type": "text", "text": "請在左側貼上您的 JSON 代碼，右側會即時渲染畫面。確認無誤後點擊發送即可。", "size": "xs", "color": "#8c8c8c", "margin": "md", "wrap": true }
-                ]
-            },
-            "footer": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": [
-                    { "type": "button", "action": { "type": "uri", "label": "查看說明", "uri": "https://line.me" }, "style": "primary", "color": "#06C755" }
+                    { "type": "text", "text": "Flex Message 編輯器", "weight": "bold", "size": "xl" },
+                    { "type": "text", "text": "在此貼上 JSON 即可預覽發送效果", "size": "sm", "color": "#888888", "margin": "md", "wrap": true }
                 ]
             }
         };
 
         window.onload = () => {
-            detectedUrlInput.value = window.location.href.split('?')[0];
-            const savedLiffId = localStorage.getItem('my_liff_id_v5');
-            if (savedLiffId) {
-                liffIdInput.value = savedLiffId;
-                initLIFF(savedLiffId);
+            currentUrlText.innerText = window.location.href.split('?')[0];
+            const savedId = localStorage.getItem('liff_id_pro_v1');
+            if (savedId) {
+                liffIdInput.value = savedId;
+                initLIFF(savedId);
             }
-            jsonInput.value = JSON.stringify(welcomeTemplate, null, 2);
+            jsonInput.value = JSON.stringify(baseTemplate, null, 2);
             updatePreview();
         };
 
@@ -267,11 +200,10 @@
                 await liff.init({ liffId: id });
                 isLiffReady = true;
                 updateAuthUI();
-                showToast("LIFF 連線成功");
+                showToast("LIFF 連線已建立");
             } catch (err) {
                 isLiffReady = false;
-                console.error("LIFF Init Error:", err);
-                showToast("初始化失敗：請檢查 ID 與網址設定");
+                showToast("初始化失敗：請檢查 ID 或 Endpoint 設定");
             }
         }
 
@@ -279,152 +211,126 @@
             if (liff.isLoggedIn()) {
                 statusDot.className = "status-dot status-on";
                 btnLogin.classList.add('hidden');
-                liff.getProfile().then(profile => {
-                    userInfoText.innerText = `CONNECTED AS: ${profile.displayName}`;
+                liff.getProfile().then(p => {
+                    userInfoText.innerText = `ONLINE: ${p.displayName}`;
                 });
             } else {
                 statusDot.className = "status-dot status-off";
                 btnLogin.classList.remove('hidden');
-                userInfoText.innerText = "尚未登入 LINE 帳號";
+                userInfoText.innerText = "OFFLINE";
             }
         }
 
         function handleLogin() {
-            if (!isLiffReady) return showToast("請先完成 LIFF 初始化");
-            liff.login();
+            if (isLiffReady) liff.login();
         }
 
         liffIdInput.addEventListener('blur', () => {
             const id = liffIdInput.value.trim();
             if (id) {
-                localStorage.setItem('my_liff_id_v5', id);
+                localStorage.setItem('liff_id_pro_v1', id);
                 initLIFF(id);
             }
         });
 
-        // --- 核心：Flex Message 渲染模擬器 ---
+        // --- 優化後的渲染引擎 ---
         function updatePreview() {
             try {
                 let json = JSON.parse(jsonInput.value.trim());
-                // 如果是 Wrapped 結構，取 contents
                 if (json.contents) json = json.contents;
                 
                 flexRenderTarget.innerHTML = "";
                 
                 if (json.type === "carousel") {
-                    const carouselContainer = document.createElement('div');
-                    carouselContainer.className = "flex overflow-x-auto gap-4 pb-4 custom-scrollbar";
-                    json.contents.forEach(bubble => {
-                        carouselContainer.appendChild(createBubbleEl(bubble));
-                    });
-                    flexRenderTarget.appendChild(carouselContainer);
+                    const scroll = document.createElement('div');
+                    scroll.className = "flex overflow-x-auto gap-3 pb-2";
+                    json.contents.forEach(b => scroll.appendChild(createBubble(b)));
+                    flexRenderTarget.appendChild(scroll);
                 } else if (json.type === "bubble") {
-                    flexRenderTarget.appendChild(createBubbleEl(json));
+                    flexRenderTarget.appendChild(createBubble(json));
                 } else if (Array.isArray(json)) {
-                    // 容錯：如果是陣列但沒寫 carousel
-                    const carouselContainer = document.createElement('div');
-                    carouselContainer.className = "flex overflow-x-auto gap-4 pb-4 custom-scrollbar";
-                    json.forEach(bubble => {
-                        carouselContainer.appendChild(createBubbleEl(bubble));
-                    });
-                    flexRenderTarget.appendChild(carouselContainer);
+                    const scroll = document.createElement('div');
+                    scroll.className = "flex overflow-x-auto gap-3 pb-2";
+                    json.forEach(b => scroll.appendChild(createBubble(b)));
+                    flexRenderTarget.appendChild(scroll);
                 }
             } catch (e) {
-                // 靜默失敗或顯示簡易提示
+                // 語法錯誤時不更新預覽
             }
         }
 
-        function createBubbleEl(data) {
-            const bubble = document.createElement('div');
-            bubble.className = "flex-bubble shadow-md shrink-0";
-            bubble.style.width = data.size === "micro" ? "160px" : (data.size === "nano" ? "120px" : "280px");
+        function createBubble(data) {
+            const el = document.createElement('div');
+            el.className = "flex-bubble shrink-0";
+            el.style.width = data.size === "micro" ? "160px" : "260px";
             
-            // Hero
-            if (data.hero) bubble.appendChild(renderComponent(data.hero));
-            // Body
-            if (data.body) bubble.appendChild(renderComponent(data.body));
-            // Footer
-            if (data.footer) bubble.appendChild(renderComponent(data.footer));
+            if (data.hero) el.appendChild(renderComp(data.hero));
+            if (data.body) el.appendChild(renderComp(data.body));
+            if (data.footer) el.appendChild(renderComp(data.footer));
             
-            return bubble;
-        }
-
-        function renderComponent(comp) {
-            if (!comp) return document.createElement('div');
-            
-            let el;
-            switch (comp.type) {
-                case 'box':
-                    el = document.createElement('div');
-                    el.className = `flex-${comp.layout === 'horizontal' ? 'box-horizontal' : 'box-vertical'}`;
-                    if (comp.paddingAll) el.style.padding = comp.paddingAll.replace('md','12px').replace('lg','20px').replace('sm','8px');
-                    if (comp.contents) comp.contents.forEach(c => el.appendChild(renderComponent(c)));
-                    break;
-                case 'text':
-                    el = document.createElement('div');
-                    el.innerText = comp.text;
-                    el.style.fontWeight = comp.weight === 'bold' ? '700' : '400';
-                    el.style.fontSize = comp.size === 'xl' ? '20px' : (comp.size === 'xs' ? '12px' : '14px');
-                    el.style.color = comp.color || '#333333';
-                    if (comp.wrap) el.style.wordBreak = 'break-all';
-                    if (comp.margin) el.style.marginTop = '8px';
-                    break;
-                case 'image':
-                    el = document.createElement('div');
-                    el.style.width = '100%';
-                    el.style.backgroundColor = '#f1f5f9';
-                    const img = document.createElement('img');
-                    img.src = comp.url;
-                    img.style.width = '100%';
-                    img.style.display = 'block';
-                    img.style.objectFit = comp.aspectMode || 'cover';
-                    el.appendChild(img);
-                    break;
-                case 'button':
-                    el = document.createElement('div');
-                    el.innerText = comp.action ? comp.action.label : "Button";
-                    el.className = "text-center py-2 m-1 rounded-lg text-sm font-bold cursor-pointer";
-                    if (comp.style === 'primary') {
-                        el.style.backgroundColor = comp.color || '#06C755';
-                        el.style.color = 'white';
-                    } else {
-                        el.style.border = `1px solid ${comp.color || '#ccc'}`;
-                        el.style.color = comp.color || '#333';
-                    }
-                    break;
-                default:
-                    el = document.createElement('div');
-            }
             return el;
         }
 
-        // --- 發送邏輯 ---
+        function renderComp(c) {
+            if (!c) return document.createElement('div');
+            let div;
+            switch(c.type) {
+                case 'box':
+                    div = document.createElement('div');
+                    div.className = `flex-${c.layout === 'horizontal' ? 'box-horizontal' : 'box-vertical'}`;
+                    if (c.backgroundColor) div.style.backgroundColor = c.backgroundColor;
+                    if (c.paddingAll) div.style.padding = '12px';
+                    if (c.contents) c.contents.forEach(child => div.appendChild(renderComp(child)));
+                    break;
+                case 'text':
+                    div = document.createElement('div');
+                    div.innerText = c.text;
+                    div.style.color = c.color || '#333';
+                    div.style.fontSize = c.size === 'xl' ? '18px' : '13px';
+                    div.style.fontWeight = c.weight === 'bold' ? '700' : '400';
+                    if (c.wrap) div.style.wordBreak = 'break-all';
+                    if (c.margin) div.style.marginTop = '8px';
+                    break;
+                case 'image':
+                    div = document.createElement('img');
+                    div.src = c.url;
+                    div.style.width = '100%';
+                    div.style.display = 'block';
+                    div.style.objectFit = 'cover';
+                    break;
+                case 'button':
+                    div = document.createElement('div');
+                    div.innerText = c.action?.label || 'Button';
+                    div.className = "text-center py-2 m-1 rounded-lg text-xs font-bold";
+                    if (c.style === 'primary') {
+                        div.style.backgroundColor = c.color || '#06C755';
+                        div.style.color = 'white';
+                    } else {
+                        div.style.border = `1px solid ${c.color || '#ddd'}`;
+                        div.style.color = c.color || '#666';
+                    }
+                    break;
+                default:
+                    div = document.createElement('div');
+            }
+            return div;
+        }
+
         async function shareTargetPicker() {
-            if (!isLiffReady) return showToast("LIFF 尚未就緒");
+            if (!isLiffReady) return showToast("請確認 LIFF 已初始化");
             if (!liff.isLoggedIn()) return liff.login();
 
             try {
-                let flexContents = JSON.parse(jsonInput.value.trim());
-                
-                // 結構自動校正
-                if (flexContents.contents) flexContents = flexContents.contents;
-                if (Array.isArray(flexContents)) {
-                    flexContents = { "type": "carousel", "contents": flexContents };
-                }
+                let flex = JSON.parse(jsonInput.value.trim());
+                if (flex.contents) flex = flex.contents;
+                if (Array.isArray(flex)) flex = { "type": "carousel", "contents": flex };
 
-                if (!flexContents.type) return showToast("JSON 缺少必要的 type 欄位");
-
-                const result = await liff.shareTargetPicker([
-                    { 
-                      "type": "flex", 
-                      "altText": altTextInput.value || "分享訊息", 
-                      "contents": flexContents 
-                    }
+                const res = await liff.shareTargetPicker([
+                    { "type": "flex", "altText": altTextInput.value, "contents": flex }
                 ]);
-
-                if (result) showToast("訊息發送視窗已關閉");
+                if (res) showToast("發送成功");
             } catch (err) {
-                showToast("語法解析失敗，請檢查代碼");
+                showToast("語法解析錯誤");
             }
         }
 
@@ -436,19 +342,11 @@
             } catch (e) { showToast("語法有誤"); }
         }
 
-        function toggleGuide() { githubGuide.classList.toggle('hidden'); }
-
-        function copyUrl() {
-            detectedUrlInput.select();
-            document.execCommand('copy');
-            showToast("Endpoint 網址已複製");
-        }
-
         function showToast(msg) {
-            const toast = document.getElementById('toast');
-            document.getElementById('toast-text').innerText = msg;
-            toast.classList.remove('translate-y-24', 'opacity-0');
-            setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 2500);
+            const t = document.getElementById('toast');
+            t.innerText = msg;
+            t.classList.remove('translate-y-32', 'opacity-0');
+            setTimeout(() => t.classList.add('translate-y-32', 'opacity-0'), 2500);
         }
 
         jsonInput.addEventListener('input', updatePreview);
