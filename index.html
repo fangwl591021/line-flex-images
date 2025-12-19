@@ -39,24 +39,24 @@
                 <i data-lucide="send" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 class="font-bold text-slate-800 flex items-center gap-2">
+                <h1 class="font-bold text-slate-800 flex items-center gap-2 text-sm md:text-base">
                     Flex JSON 推送器
                     <span id="liff-status-dot" class="status-dot status-off" title="LIFF 狀態"></span>
                 </h1>
                 <p id="liff-user-name" class="text-[10px] text-slate-400 -mt-1">尚未登入 LINE</p>
             </div>
         </div>
-        <div class="flex items-center gap-4">
-            <!-- 加大後的 LIFF ID 輸入區 -->
+        <div class="flex items-center gap-2 md:gap-4">
+            <!-- 強化後的 LIFF ID 輸入區 -->
             <div class="flex items-center gap-2 bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200 transition-all focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500">
-                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">LIFF ID</span>
-                <input type="text" id="liff-id-input" placeholder="填入 200xxxxxxx-xxxxxxxx" class="bg-transparent text-xs w-56 md:w-80 outline-none border-none focus:ring-0 font-mono text-slate-700">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider hidden md:inline">LIFF ID</span>
+                <input type="text" id="liff-id-input" placeholder="200xxxxxxx-xxxxxxxx" class="bg-transparent text-xs w-48 md:w-80 outline-none border-none focus:ring-0 font-mono text-slate-700">
             </div>
             <button id="btn-login" onclick="handleLogin()" class="hidden bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-sm">
-                <i data-lucide="log-in" class="w-4 h-4"></i> 登入 LINE
+                <i data-lucide="log-in" class="w-4 h-4"></i> 登入
             </button>
             <button id="btn-share" onclick="shareTargetPicker()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-md">
-                <i data-lucide="share-2" class="w-4 h-4"></i> 選擇好友傳送
+                <i data-lucide="share-2" class="w-4 h-4"></i> 發送
             </button>
         </div>
     </header>
@@ -64,12 +64,14 @@
     <main class="flex-1 flex overflow-hidden">
         <!-- 左側：JSON 輸入區 -->
         <section class="w-1/2 flex flex-col border-r border-slate-200 bg-white">
-            <div class="p-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
-                <span class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
-                    <i data-lucide="code" class="w-3.5 h-3.5"></i> 貼上 JSON 代碼
-                </span>
+            <div class="p-3 bg-slate-50 border-b border-slate-200 flex flex-wrap gap-2 justify-between items-center">
+                <div class="flex items-center gap-2 bg-white border border-slate-300 rounded px-2 py-1">
+                    <span class="text-[10px] font-bold text-slate-400 uppercase">預覽文字</span>
+                    <input type="text" id="alt-text-input" value="您收到了一則訊息" class="text-xs outline-none border-none w-32 md:w-48">
+                </div>
                 <div class="flex gap-2">
-                    <button onclick="formatJSON()" class="text-[10px] bg-white border border-slate-300 px-2 py-1 rounded hover:bg-slate-50 transition font-bold">格式化 JSON</button>
+                    <button onclick="useTemplate()" class="text-[10px] bg-slate-100 border border-slate-300 px-2 py-1 rounded hover:bg-slate-200 transition">載入範本</button>
+                    <button onclick="formatJSON()" class="text-[10px] bg-white border border-slate-300 px-2 py-1 rounded hover:bg-slate-50 transition font-bold">格式化</button>
                 </div>
             </div>
             <textarea id="json-input" class="flex-1 p-4 text-sm json-editor outline-none resize-none custom-scrollbar" placeholder='在此貼上 Flex Message 的 JSON 物件...' spellcheck="false"></textarea>
@@ -79,43 +81,40 @@
         <section class="w-1/2 flex flex-col bg-slate-100">
             <div class="p-3 bg-slate-50 border-b border-slate-200 flex justify-between items-center">
                 <span class="text-xs font-bold text-slate-500 uppercase flex items-center gap-2">
-                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> 預覽與設定
+                    <i data-lucide="eye" class="w-3.5 h-3.5"></i> 狀態偵測
                 </span>
                 <button onclick="toggleGuide()" class="text-[10px] text-blue-600 hover:underline">部署教學</button>
             </div>
             
             <div class="flex-1 overflow-y-auto preview-area p-8 flex flex-col items-center custom-scrollbar">
                 
-                <!-- GitHub 部署診斷 -->
+                <!-- 網址偵測 -->
                 <div class="w-full max-w-[420px] bg-white rounded-xl p-5 mb-6 shadow-lg border-2 border-blue-100">
                     <h3 class="text-sm font-bold text-blue-800 mb-2 flex items-center gap-2">
-                        <i data-lucide="globe" class="w-4 h-4"></i> 當前網址偵測
+                        <i data-lucide="globe" class="w-4 h-4"></i> Endpoint URL
                     </h3>
                     <div class="flex gap-2 mb-2">
                         <input type="text" id="detected-url" readonly class="flex-1 text-[10px] p-2 bg-slate-50 border border-slate-200 rounded font-mono text-slate-400 outline-none">
-                        <button onclick="copyUrl()" class="px-3 py-1 bg-blue-500 text-white text-[10px] font-bold rounded hover:bg-blue-600 transition shrink-0">複製網址</button>
+                        <button onclick="copyUrl()" class="px-3 py-1 bg-blue-500 text-white text-[10px] font-bold rounded hover:bg-blue-600 transition shrink-0">複製</button>
                     </div>
-                    <p class="text-[10px] text-slate-400 italic">※ 請將此網址設為 LINE Console 的 Endpoint URL。</p>
                 </div>
 
                 <!-- 預覽容器 -->
                 <div id="preview-container" class="w-full max-w-[350px] shadow-2xl rounded-2xl overflow-hidden bg-white">
                     <div class="p-8 text-center text-slate-400 italic text-sm">
-                        JSON 預覽將顯示於此
+                        JSON 格式檢測區
                     </div>
                 </div>
                 
-                <!-- GitHub 指南 -->
-                <div id="github-guide" class="mt-6 w-full max-w-[420px] bg-slate-800 text-white rounded-xl p-5 shadow-xl">
+                <!-- 指南 -->
+                <div id="github-guide" class="mt-6 w-full max-w-[420px] bg-slate-800 text-white rounded-xl p-5 shadow-xl hidden">
                     <h3 class="text-sm font-bold mb-3 flex items-center gap-2 text-blue-400">
                         <i data-lucide="github" class="w-4 h-4"></i> GitHub Pages 部署步驟
                     </h3>
                     <ul class="text-[11px] space-y-3 text-slate-300 list-decimal ml-4 leading-relaxed">
-                        <li>在 GitHub 建立 Repository 並命名。</li>
-                        <li>新增檔案 <b>index.html</b> 並貼入本頁代碼。</li>
-                        <li>進入 Settings > Pages，將 Branch 設為 <b>main</b> 並儲存。</li>
-                        <li>等待 1 分鐘後，存取 GitHub 提供給您的網址。</li>
-                        <li><b>最重要：</b> 將 GitHub 網址複製並更新到 LINE 的 Endpoint URL。</li>
+                        <li>在 GitHub 建立 Repository 並上傳 <b>index.html</b>。</li>
+                        <li>Settings > Pages，將 Branch 設為 <b>main</b>。</li>
+                        <li><b>最重要：</b> 將 GitHub 給您的網址貼回 LINE 控制台的 Endpoint URL。</li>
                     </ul>
                 </div>
 
@@ -138,31 +137,31 @@
         const btnLogin = document.getElementById('btn-login');
         const githubGuide = document.getElementById('github-guide');
         const detectedUrlInput = document.getElementById('detected-url');
+        const altTextInput = document.getElementById('alt-text-input');
 
         let isLiffReady = false;
 
-        const defaultJSON = {
+        const defaultTemplate = {
           "type": "bubble",
           "body": {
             "type": "box",
             "layout": "vertical",
             "contents": [
-              { "type": "text", "text": "GitHub Pages 測試成功", "weight": "bold", "size": "xl" },
-              { "type": "text", "text": "現在您可以直接貼上 Flex JSON 並發送", "size": "sm", "color": "#666666", "margin": "md" }
+              { "type": "text", "text": "測試發送成功！", "weight": "bold", "size": "xl" },
+              { "type": "text", "text": "如果您能看到這個泡泡，代表發送功能完全正常。", "size": "xs", "color": "#666666", "margin": "md", "wrap": true }
             ]
           }
         };
 
         window.onload = () => {
-            // 設定目前的網址診斷
             detectedUrlInput.value = window.location.href.split('?')[0];
             
-            const savedLiffId = localStorage.getItem('my_liff_id_github_fixed');
+            const savedLiffId = localStorage.getItem('my_liff_id_github_v4');
             if (savedLiffId) {
                 liffIdInput.value = savedLiffId;
                 initLIFF(savedLiffId);
             }
-            jsonInput.value = JSON.stringify(defaultJSON, null, 2);
+            jsonInput.value = JSON.stringify(defaultTemplate, null, 2);
             updatePreview();
         };
 
@@ -171,11 +170,11 @@
                 await liff.init({ liffId: id });
                 isLiffReady = true;
                 updateAuthUI();
-                showToast("LIFF 初始化成功");
+                showToast("LIFF 已就緒");
             } catch (err) {
                 isLiffReady = false;
                 console.error("Init Error:", err);
-                showToast("初始化失敗：請確認網址與後台設定一致");
+                showToast("初始化失敗：請檢查 ID");
             }
         }
 
@@ -204,7 +203,7 @@
         liffIdInput.addEventListener('blur', () => {
             const id = liffIdInput.value.trim();
             if (id) {
-                localStorage.setItem('my_liff_id_github_fixed', id);
+                localStorage.setItem('my_liff_id_github_v4', id);
                 initLIFF(id);
             }
         });
@@ -220,13 +219,41 @@
             }
 
             try {
-                const flexContents = JSON.parse(jsonInput.value.trim());
+                let flexContents = JSON.parse(jsonInput.value.trim());
+                
+                // --- 智慧型處理邏輯 ---
+                // 1. 如果使用者貼入的是完整的「訊息包裝」，自動提取內容
+                if (flexContents.contents) {
+                    flexContents = flexContents.contents;
+                }
+                
+                // 2. 如果使用者貼入的是一個陣列，自動轉為 carousel
+                if (Array.isArray(flexContents)) {
+                    flexContents = {
+                        "type": "carousel",
+                        "contents": flexContents
+                    };
+                }
+
+                // 3. 基本檢查
+                if (!flexContents.type) {
+                    showToast("錯誤：JSON 缺少 'type' 宣告 (bubble 或 carousel)");
+                    return;
+                }
+
                 const result = await liff.shareTargetPicker([
-                    { "type": "flex", "altText": "您收到了一則訊息", "contents": flexContents }
+                    { 
+                      "type": "flex", 
+                      "altText": altTextInput.value || "您收到了一則 Flex 訊息", 
+                      "contents": flexContents 
+                    }
                 ]);
-                if (result) showToast("訊息已發送！");
+
+                if (result) {
+                    showToast("視窗已關閉 (傳送成功)");
+                }
             } catch (err) {
-                showToast("發送失敗：請檢查 JSON 內容語法");
+                showToast("語法解析失敗，請檢查 JSON 格式");
                 console.error(err);
             }
         }
@@ -235,11 +262,17 @@
             try {
                 const data = JSON.parse(jsonInput.value);
                 errorMsg.classList.add('hidden');
+                
+                let detectedType = data.type || (data.contents ? "Wrapped Object" : (Array.isArray(data) ? "Array" : "Unknown"));
+                
                 previewContainer.innerHTML = `
                     <div class="bg-white p-6">
                         <div class="p-4 bg-emerald-50 rounded-lg border border-dashed border-emerald-300 text-center">
-                            <p class="text-xs text-emerald-600 font-bold mb-1">語法格式正確</p>
-                            <p class="text-[10px] text-emerald-500 uppercase">類型: ${data.type || '未知'}</p>
+                            <p class="text-xs text-emerald-600 font-bold mb-1">語法格式合法</p>
+                            <p class="text-[10px] text-emerald-500 uppercase tracking-widest">TYPE: ${detectedType}</p>
+                        </div>
+                        <div class="mt-4 text-[10px] text-slate-400 leading-relaxed italic">
+                            提示：若發送後沒收到，請確認泡泡內的所有圖片網址是否為 HTTPS 且公開可存取。
                         </div>
                     </div>
                 `;
@@ -249,11 +282,16 @@
             }
         }
 
+        function useTemplate() {
+            jsonInput.value = JSON.stringify(defaultTemplate, null, 2);
+            updatePreview();
+        }
+
         function formatJSON() {
             try {
                 const obj = JSON.parse(jsonInput.value);
                 jsonInput.value = JSON.stringify(obj, null, 2);
-            } catch (e) { showToast("JSON 代碼有誤，無法格式化"); }
+            } catch (e) { showToast("語法有誤，無法格式化"); }
         }
 
         function toggleGuide() {
