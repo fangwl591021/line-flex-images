@@ -47,11 +47,12 @@
             </div>
         </div>
         <div class="flex items-center gap-4">
-            <div class="flex items-center gap-2 bg-slate-100 px-3 py-1.5 rounded-full border border-slate-200">
-                <span class="text-[10px] font-bold text-slate-500 uppercase">LIFF ID</span>
-                <input type="text" id="liff-id-input" placeholder="填入 ID" class="bg-transparent text-xs w-32 outline-none border-none focus:ring-0">
+            <!-- 加大後的 LIFF ID 輸入區 -->
+            <div class="flex items-center gap-2 bg-slate-100 px-4 py-1.5 rounded-full border border-slate-200 transition-all focus-within:ring-2 focus-within:ring-emerald-500/20 focus-within:border-emerald-500">
+                <span class="text-[10px] font-bold text-slate-500 uppercase tracking-wider">LIFF ID</span>
+                <input type="text" id="liff-id-input" placeholder="填入 200xxxxxxx-xxxxxxxx" class="bg-transparent text-xs w-56 md:w-80 outline-none border-none focus:ring-0 font-mono text-slate-700">
             </div>
-            <button id="btn-login" onclick="handleLogin()" class="hidden bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2">
+            <button id="btn-login" onclick="handleLogin()" class="hidden bg-blue-500 hover:bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-sm">
                 <i data-lucide="log-in" class="w-4 h-4"></i> 登入 LINE
             </button>
             <button id="btn-share" onclick="shareTargetPicker()" class="bg-emerald-500 hover:bg-emerald-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold transition flex items-center gap-2 shadow-md">
@@ -92,7 +93,7 @@
                     </h3>
                     <div class="flex gap-2 mb-2">
                         <input type="text" id="detected-url" readonly class="flex-1 text-[10px] p-2 bg-slate-50 border border-slate-200 rounded font-mono text-slate-400 outline-none">
-                        <button onclick="copyUrl()" class="px-3 py-1 bg-blue-500 text-white text-[10px] font-bold rounded hover:bg-blue-600 transition shrink-0">複製</button>
+                        <button onclick="copyUrl()" class="px-3 py-1 bg-blue-500 text-white text-[10px] font-bold rounded hover:bg-blue-600 transition shrink-0">複製網址</button>
                     </div>
                     <p class="text-[10px] text-slate-400 italic">※ 請將此網址設為 LINE Console 的 Endpoint URL。</p>
                 </div>
@@ -146,16 +147,17 @@
             "type": "box",
             "layout": "vertical",
             "contents": [
-              { "type": "text", "text": "GitHub Pages 測試", "weight": "bold", "size": "xl" },
-              { "type": "text", "text": "穩定推播不中斷", "size": "sm", "color": "#666666", "margin": "md" }
+              { "type": "text", "text": "GitHub Pages 測試成功", "weight": "bold", "size": "xl" },
+              { "type": "text", "text": "現在您可以直接貼上 Flex JSON 並發送", "size": "sm", "color": "#666666", "margin": "md" }
             ]
           }
         };
 
         window.onload = () => {
+            // 設定目前的網址診斷
             detectedUrlInput.value = window.location.href.split('?')[0];
             
-            const savedLiffId = localStorage.getItem('my_liff_id_github');
+            const savedLiffId = localStorage.getItem('my_liff_id_github_fixed');
             if (savedLiffId) {
                 liffIdInput.value = savedLiffId;
                 initLIFF(savedLiffId);
@@ -173,7 +175,7 @@
             } catch (err) {
                 isLiffReady = false;
                 console.error("Init Error:", err);
-                showToast("初始化失敗：請檢查 ID 與 Endpoint 網址");
+                showToast("初始化失敗：請確認網址與後台設定一致");
             }
         }
 
@@ -193,7 +195,7 @@
 
         function handleLogin() {
             if (!isLiffReady) {
-                showToast("請先完成初始化");
+                showToast("請先輸入有效的 LIFF ID");
                 return;
             }
             liff.login();
@@ -202,7 +204,7 @@
         liffIdInput.addEventListener('blur', () => {
             const id = liffIdInput.value.trim();
             if (id) {
-                localStorage.setItem('my_liff_id_github', id);
+                localStorage.setItem('my_liff_id_github_fixed', id);
                 initLIFF(id);
             }
         });
@@ -224,7 +226,8 @@
                 ]);
                 if (result) showToast("訊息已發送！");
             } catch (err) {
-                showToast("發送失敗：JSON 格式錯誤");
+                showToast("發送失敗：請檢查 JSON 內容語法");
+                console.error(err);
             }
         }
 
@@ -234,9 +237,9 @@
                 errorMsg.classList.add('hidden');
                 previewContainer.innerHTML = `
                     <div class="bg-white p-6">
-                        <div class="p-4 bg-blue-50 rounded-lg border border-dashed border-blue-300 text-center">
-                            <p class="text-xs text-blue-600 font-bold mb-1">語法正確</p>
-                            <p class="text-[10px] text-blue-500 uppercase">類型: ${data.type || '未知'}</p>
+                        <div class="p-4 bg-emerald-50 rounded-lg border border-dashed border-emerald-300 text-center">
+                            <p class="text-xs text-emerald-600 font-bold mb-1">語法格式正確</p>
+                            <p class="text-[10px] text-emerald-500 uppercase">類型: ${data.type || '未知'}</p>
                         </div>
                     </div>
                 `;
@@ -250,7 +253,7 @@
             try {
                 const obj = JSON.parse(jsonInput.value);
                 jsonInput.value = JSON.stringify(obj, null, 2);
-            } catch (e) { showToast("語法有誤"); }
+            } catch (e) { showToast("JSON 代碼有誤，無法格式化"); }
         }
 
         function toggleGuide() {
