@@ -3,531 +3,933 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- 強制防快取標籤 -->
-    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-    <meta http-equiv="Pragma" content="no-cache">
-    <meta http-equiv="Expires" content="0">
-    
-    <title>Flex Sender Ultra Pro v2.0</title>
+    <title>LINE Flex Message Editor</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Lucide Icons -->
     <script src="https://unpkg.com/lucide@latest"></script>
-    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lz-string/1.5.0/lz-string.min.js"></script>
+    <!-- Google Fonts -->
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Fira+Code:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background-color: #f1f5f9; }
         
-        :root {
-            --line-green: #06C755;
-            --line-blue: #748da6;
-            --editor-bg: #1e1e1e;
-            --header-bg: #1e293b; /* v2.0 專業深灰色風格 */
-        }
-
-        body { 
-            font-family: 'Noto Sans TC', sans-serif; 
-            background-color: #f1f5f9; 
-            height: 100vh;
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        header {
-            background: var(--header-bg);
-            border-bottom: 2px solid rgba(255,255,255,0.1);
-            padding: 0 1.5rem;
-            height: 75px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.2);
-            z-index: 50;
-        }
-
-        header h1 { color: white; }
-
-        .liff-id-container {
-            background: rgba(255,255,255,0.08);
-            border: 1px solid rgba(255,255,255,0.15);
-            border-radius: 14px;
-            padding: 0.6rem 1.2rem;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            width: 550px;
-            transition: all 0.2s;
-        }
-
-        .liff-id-container:focus-within {
-            border-color: var(--line-green);
-            background: rgba(255,255,255,0.12);
-            box-shadow: 0 0 0 4px rgba(6, 199, 85, 0.2);
-        }
-
-        .liff-id-container input {
-            color: white;
-            font-weight: bold;
-            font-family: 'Fira Code', monospace;
-        }
-
-        main {
-            flex: 1;
-            display: flex;
-            overflow: hidden;
-        }
-
-        .editor-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: var(--editor-bg);
-        }
-
-        #json-input {
-            flex: 1;
-            padding: 1.5rem;
-            font-family: 'Fira Code', monospace;
-            font-size: 14px;
-            border: none;
-            outline: none;
-            resize: none;
-            background: transparent;
-            color: #d4d4d4;
-            tab-size: 4;
-        }
-
-        .preview-wrapper {
-            width: 550px;
-            background: #e2e8f0;
-            border-left: 1px solid #cbd5e1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 1.5rem;
-            overflow-y: auto;
-        }
-
-        .device-frame {
-            width: 380px;
-            min-height: 680px;
-            background: var(--line-blue);
-            border-radius: 48px;
-            border: 12px solid #020617;
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            position: relative;
-        }
-
-        .device-header {
-            height: 42px;
-            background: rgba(0,0,0,0.15);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .device-header::after {
-            content: '';
-            width: 55px;
-            height: 5px;
-            background: rgba(255,255,255,0.25);
-            border-radius: 10px;
-        }
-
-        .device-screen {
-            flex: 1;
-            padding: 16px;
-            overflow-y: auto;
-        }
-        .device-screen::-webkit-scrollbar { display: none; }
-
-        .flex-bubble-card {
-            background: white;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        /* 聊天室背景區 */
+        .chat-room-bg {
+            background-color: #7988a0;
             width: 100%;
-        }
-
-        .status-dot {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-        }
-        .status-online { background: #22c55e; box-shadow: 0 0 12px #22c55e; }
-        .status-offline { background: #ef4444; box-shadow: 0 0 12px #ef4444; }
-
-        .btn-send {
-            background: var(--line-green);
-            color: white;
-            padding: 12px 36px;
-            border-radius: 16px;
-            font-weight: 900;
-            font-size: 16px;
-            transition: all 0.2s;
+            height: 100%;
+            overflow-y: auto;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
-            box-shadow: 0 4px 15px rgba(6, 199, 85, 0.4);
+            padding: 20px;
         }
-        .btn-send:hover { opacity: 0.9; transform: translateY(-1px); }
-        .btn-send:active { transform: translateY(0); }
 
-        .btn-tool {
-            background: #334155;
-            color: #f1f5f9;
-            padding: 7px 15px;
-            border-radius: 9px;
-            font-size: 12px;
-            font-weight: 700;
-            display: flex;
-            align-items: center;
-            gap: 7px;
-            transition: all 0.2s;
+        /* Flex 氣泡本體限制寬度 */
+        .flex-bubble-container {
+            width: 100%;
+            max-width: 350px; /* 模擬手機寬度 */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
         }
-        .btn-tool:hover { background: #475569; color: white; }
+
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #94a3b8; border-radius: 10px; }
+        
+        /* LINE Brand Colors */
+        .border-line-green { border-color: #06C755; }
+        .bg-line-green { background-color: #06C755; }
+        .text-line-green { color: #06C755; }
+
+        /* 比例工具 CSS */
+        .aspect-1-1 { aspect-ratio: 1 / 1; }
+        .aspect-16-9 { aspect-ratio: 16 / 9; }
+        .aspect-4-3 { aspect-ratio: 4 / 3; }
+        .aspect-1_91-1 { aspect-ratio: 1.91 / 1; }
+        .aspect-3-4 { aspect-ratio: 3 / 4; }
     </style>
 </head>
-<body>
+<body class="h-screen flex flex-col overflow-hidden text-slate-900">
 
-    <header>
-        <div class="flex items-center gap-4">
-            <div class="bg-emerald-500 p-2.5 rounded-2xl text-white shadow-lg">
-                <i data-lucide="layout"></i>
+    <!-- Header -->
+    <header class="h-14 bg-white border-b border-slate-300 flex items-center justify-between px-6 z-20 flex-shrink-0 shadow-sm">
+        <div class="flex items-center gap-3">
+            <div class="bg-line-green p-1.5 rounded-lg text-white">
+                <i data-lucide="layout-grid" class="w-5 h-5"></i>
             </div>
             <div>
-                <h1 class="font-black m-0 text-xl flex items-center gap-3 tracking-tight">
-                    Flex Sender Pro <span class="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full">v2.0</span>
-                    <span id="liff-status-indicator" class="status-dot status-offline"></span>
-                </h1>
-                <p id="user-status-text" class="text-[10px] text-slate-400 font-bold uppercase m-0 tracking-widest">Initialization Required</p>
+                <h1 class="font-bold text-base text-slate-800">Flex 產生器 (GitHub 版)</h1>
             </div>
         </div>
-
-        <div class="flex items-center gap-4">
-            <div class="liff-id-container shadow-inner">
-                <i data-lucide="shield-check" class="w-5 h-5 text-emerald-500"></i>
-                <input type="text" id="liff-id-input" placeholder="貼入您的 LIFF ID (例如 200xxxxxxx-xxxxxxxx)" 
-                       class="bg-transparent text-sm w-full outline-none font-bold">
-            </div>
-            <button id="btn-login-trigger" onclick="liff.login()" class="hidden text-sm font-bold text-emerald-400 hover:text-white underline">登入帳號</button>
-            <button onclick="sendFlexMessage()" class="btn-send">
-                <i data-lucide="share-2" class="w-5 h-5"></i> 分享好友
+        <div class="flex gap-2">
+            <button onclick="undo()" id="btn-undo" class="px-3 py-1.5 text-xs font-bold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-100 transition disabled:opacity-50 flex items-center gap-1">
+                <i data-lucide="rotate-ccw" class="w-3 h-3"></i> 復原
+            </button>
+            <button onclick="exportJSON()" class="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition shadow-lg flex items-center gap-2">
+                <i data-lucide="copy" class="w-3 h-3"></i> 複製 JSON
             </button>
         </div>
     </header>
 
-    <main>
-        <!-- 編輯區 -->
-        <section class="editor-wrapper">
-            <div class="px-6 py-3 border-b border-white/10 flex justify-between items-center bg-[#252526]">
-                <div class="flex items-center gap-6">
-                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                        <i data-lucide="file-json" class="w-4 h-4"></i> JSON Editor
-                    </span>
-                    <div class="flex items-center gap-2 bg-[#3c3c3c] rounded-lg px-3 py-1 text-white border border-white/5">
-                        <span class="text-[9px] font-bold text-slate-400 uppercase">Alt Text</span>
-                        <input type="text" id="alt-text-input" value="收到精選訊息" 
-                               class="text-xs bg-transparent outline-none w-64 font-medium">
+    <div class="flex-1 flex overflow-hidden">
+        
+        <!-- 左側編輯區 -->
+        <aside class="w-full md:w-[450px] bg-white border-r border-slate-300 overflow-y-auto p-5 space-y-6 custom-scrollbar z-10 flex-shrink-0">
+            
+            <!-- Hero 設定 -->
+            <div class="border-2 border-line-green rounded-xl bg-white overflow-hidden shadow-sm">
+                <div class="p-3 bg-line-green border-b border-line-green flex items-center gap-2 font-bold text-white text-sm">
+                    <i data-lucide="image" class="w-4 h-4 text-white"></i> 頂部 Hero 視覺
+                </div>
+                <div class="p-4 space-y-4">
+                    <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-300">
+                        <button onclick="updateHeroType('image')" id="btn-type-image" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">靜態圖片</button>
+                        <button onclick="updateHeroType('video')" id="btn-type-video" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">影片播放</button>
+                        <button onclick="updateHeroType('none')" id="btn-type-none" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">無</button>
+                    </div>
+
+                    <div id="hero-settings-container">
+                        <div class="mb-4">
+                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">顯示比例</label>
+                            <select id="hero-aspect" onchange="updateConfig('heroAspect', this.value)" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-line-green outline-none">
+                                <option value="16:9">16:9 (寬螢幕)</option>
+                                <option value="1:1">1:1 (正方形)</option>
+                                <option value="4:3">4:3 (矩形)</option>
+                                <option value="1.91:1">1.91:1 (橫幅)</option>
+                                <option value="3:4">3:4 (直式)</option>
+                            </select>
+                        </div>
+
+                        <div id="hero-inputs" class="space-y-4">
+                            <div id="field-hero-url">
+                                <label class="block mb-1">
+                                    <span class="text-[11px] font-bold text-slate-700 uppercase block" id="label-hero-url">圖片網址 (Image URL)</span>
+                                    <span class="text-[10px] text-slate-400 font-normal">※ 請輸入 .jpg 或 .png 結尾的公開連結</span>
+                                </label>
+                                <input type="text" id="input-hero-url" oninput="updateConfig('heroUrl', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none">
+                            </div>
+                            <div id="field-video-url" class="hidden">
+                                <label class="block mb-1">
+                                    <span class="text-[11px] font-bold text-slate-700 uppercase block">影片網址 (Video URL)</span>
+                                    <span class="text-[10px] text-slate-400 font-normal">※ 請輸入 .mp4 結尾的影片連結</span>
+                                </label>
+                                <input type="text" id="input-video-url" oninput="updateConfig('videoUrl', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...mp4">
+                            </div>
+                            <div id="field-hero-link">
+                                <label class="block mb-1">
+                                    <span class="text-[11px] font-bold text-slate-700 uppercase block">點擊連結 (Action URL)</span>
+                                    <span class="text-[10px] text-slate-400 font-normal">※ 點擊圖片或影片後跳轉的網址</span>
+                                </label>
+                                <input type="text" id="input-hero-link" oninput="updateConfig('heroLink', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none">
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div id="hero-none-msg" class="hidden text-center py-4 text-xs text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                        已隱藏 Hero 區塊
                     </div>
                 </div>
-                <div class="flex gap-2">
-                    <button onclick="generateShareUrl()" class="btn-tool !bg-emerald-700 !text-white shadow-lg">
-                        <i data-lucide="link-2" class="w-4 h-4"></i> 製作壓縮短連結
-                    </button>
-                    <button onclick="formatCode()" class="btn-tool">
-                        <i data-lucide="wand-2" class="w-4 h-4"></i> 格式化
-                    </button>
-                    <button onclick="clearAll()" class="btn-tool !text-red-400">
-                        <i data-lucide="trash-2" class="w-4 h-4"></i> 清空
+            </div>
+
+            <!-- Body 設定 -->
+            <div class="border-2 border-line-green rounded-xl bg-white overflow-hidden shadow-sm">
+                <div class="p-3 bg-line-green border-b border-line-green flex items-center justify-between font-bold text-white text-sm">
+                    <div class="flex items-center gap-2">
+                        <i data-lucide="palette" class="w-4 h-4 text-white"></i> Body 內容與尺寸
+                    </div>
+                    <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded text-white font-mono" id="item-count-badge">0 items</span>
+                </div>
+                <div class="p-4 space-y-4">
+                    <!-- 尺寸與欄位 -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">卡片尺寸 (Size)</label>
+                            <select id="bubble-size" onchange="updateConfig('bubbleSize', this.value)" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-1 focus:ring-line-green outline-none">
+                                <option value="mega">MEGA (標準)</option>
+                                <option value="giga">GIGA (寬版)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">每行欄數</label>
+                            <select id="body-columns" onchange="updateConfig('columns', parseInt(this.value))" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-1 focus:ring-line-green outline-none">
+                                <option value="3">3 欄位</option>
+                                <option value="4">4 欄位</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- 標籤顏色設定 -->
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">標籤背景色</label>
+                            <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
+                                <input type="color" id="input-tag-bg-color" onchange="updateConfig('tagBgColor', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                                <input type="text" id="text-tag-bg-color" oninput="updateConfig('tagBgColor', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#0D0D0D">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">標籤文字色</label>
+                            <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
+                                <input type="color" id="input-tag-text-color" onchange="updateConfig('tagTextColor', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                                <input type="text" id="text-tag-text-color" oninput="updateConfig('tagTextColor', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#FFFFFF">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 背景類型切換 -->
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">背景類型</label>
+                        <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-300">
+                            <button onclick="updateBodyType('color')" id="btn-body-type-color" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">純色背景</button>
+                            <button onclick="updateBodyType('image')" id="btn-body-type-image" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">圖片背景</button>
+                        </div>
+                    </div>
+                    
+                    <!-- 背景詳細設定 (根據類型切換) -->
+                    <div id="body-bg-settings" class="space-y-4">
+                        <!-- 純色模式顯示 -->
+                        <div id="body-color-settings">
+                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">背景底色</label>
+                            <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
+                                <input type="color" id="input-body-color-simple" onchange="updateConfig('bodyColor', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                                <input type="text" id="text-body-color-simple" oninput="updateConfig('bodyColor', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#F8F8F8">
+                            </div>
+                        </div>
+
+                        <!-- 圖片模式顯示 (包含圖片+底色) -->
+                        <div id="body-image-settings" class="hidden space-y-4">
+                            <div class="grid grid-cols-2 gap-3">
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">圖片模式</label>
+                                    <select id="body-bg-mode" onchange="updateConfig('bodyBgMode', this.value)" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-1 focus:ring-line-green outline-none">
+                                        <option value="cover">全版拉伸 (Cover)</option>
+                                        <option value="top">等比縮放 (Fit Width)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">背景底色 (補白用)</label>
+                                    <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
+                                        <input type="color" id="input-body-color-img" onchange="updateConfig('bodyColor', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                                        <input type="text" id="text-body-color-img" oninput="updateConfig('bodyColor', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#F8F8F8">
+                                    </div>
+                                </div>
+                            </div>
+                            <div>
+                                <label class="block mb-1">
+                                    <span class="text-[11px] font-bold text-slate-700 uppercase block">背景圖片網址</span>
+                                    <span class="text-[10px] text-slate-400 font-normal">※ 滿版背景圖 (Absolute Background)</span>
+                                </label>
+                                <input type="text" id="input-body-bg" oninput="updateConfig('bodyBg', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div id="items-container" class="space-y-3">
+                        <!-- 商品列表動態生成 -->
+                    </div>
+
+                    <button onclick="addItem()" class="w-full py-2.5 border-2 border-dashed border-slate-400 rounded-xl text-slate-600 text-xs font-bold hover:border-line-green hover:text-line-green hover:bg-emerald-50 transition flex items-center justify-center gap-2">
+                        <i data-lucide="plus" class="w-4 h-4"></i> 新增商品
                     </button>
                 </div>
             </div>
-            <textarea id="json-input" spellcheck="false" placeholder="在此處貼上 Flex Message JSON..."></textarea>
-        </section>
 
-        <!-- 預覽區 -->
-        <section class="preview-wrapper custom-scrollbar">
-            <div class="flex items-center gap-2 mb-6">
-                <i data-lucide="smartphone" class="w-5 h-5 text-slate-500"></i>
-                <span class="text-[11px] font-black text-slate-500 uppercase tracking-[0.3em]">Device Live Preview</span>
+            <!-- Footer 設定 -->
+            <div class="border-2 border-line-green rounded-xl bg-white overflow-hidden shadow-sm">
+                <div class="p-3 bg-line-green border-b border-line-green flex items-center gap-2 font-bold text-white text-sm">
+                    <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-white"></i> 底部按鈕
+                </div>
+                <div class="p-4 space-y-4">
+                    
+                    <!-- Footer 背景色 -->
+                    <div>
+                        <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">底部背景顏色</label>
+                        <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
+                            <input type="color" id="input-footer-bg" onchange="updateConfig('footerBg', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                            <input type="text" id="text-footer-bg" oninput="updateConfig('footerBg', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#FFFFFF">
+                        </div>
+                    </div>
+
+                    <!-- Footer 說明文字開關 -->
+                    <div class="flex items-center justify-between">
+                        <label class="text-[11px] font-bold text-slate-600 uppercase">啟用說明文字</label>
+                        <label class="relative inline-flex items-center cursor-pointer">
+                            <input type="checkbox" id="input-footer-text-enabled" class="sr-only peer" onchange="updateConfig('footerTextEnabled', this.checked)">
+                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-line-green"></div>
+                        </label>
+                    </div>
+
+                    <div id="footer-text-input-area" class="hidden">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-[11px] font-bold text-slate-600 uppercase">說明內容</label>
+                            <div class="flex gap-2">
+                                <!-- Text Color Picker -->
+                                <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-1 py-0.5" title="文字顏色">
+                                    <input type="color" id="input-footer-text-color" onchange="updateConfig('footerTextColor', this.value)" class="w-4 h-4 rounded cursor-pointer border-none p-0">
+                                    <input type="text" id="text-footer-text-color" oninput="updateConfig('footerTextColor', this.value)" class="w-12 text-[10px] font-mono text-slate-600 outline-none uppercase" value="#666666">
+                                </div>
+                                <!-- Alignment -->
+                                <div class="flex bg-slate-200 rounded p-0.5 space-x-0.5">
+                                    <button onclick="updateConfig('footerTextAlign', 'start')" id="btn-align-start" class="p-1 rounded hover:bg-white transition text-slate-600" title="靠左"><i data-lucide="align-left" class="w-3 h-3"></i></button>
+                                    <button onclick="updateConfig('footerTextAlign', 'center')" id="btn-align-center" class="p-1 rounded hover:bg-white transition text-slate-600" title="置中"><i data-lucide="align-center" class="w-3 h-3"></i></button>
+                                    <button onclick="updateConfig('footerTextAlign', 'end')" id="btn-align-end" class="p-1 rounded hover:bg-white transition text-slate-600" title="靠右"><i data-lucide="align-right" class="w-3 h-3"></i></button>
+                                </div>
+                            </div>
+                        </div>
+                        <textarea id="input-footer-text" rows="3" oninput="updateConfig('footerText', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="請輸入說明文字..."></textarea>
+                    </div>
+
+                    <div class="p-3 bg-slate-50 border border-slate-300 rounded-xl">
+                        <div class="text-[11px] font-bold text-slate-700 mb-2">按鈕 1 (Primary)</div>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="input-f1-label" oninput="updateConfig('f1L', this.value)" class="flex-1 text-xs p-2 border border-slate-300 rounded bg-white focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="名稱">
+                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2 py-1 w-28">
+                                <input type="color" id="input-f1-color" onchange="updateConfig('f1C', this.value)" class="w-5 h-5 rounded cursor-pointer border-none shadow-sm">
+                                <input type="text" id="text-f1-color" oninput="updateConfig('f1C', this.value)" class="flex-1 text-[10px] font-mono text-slate-600 outline-none uppercase text-center">
+                            </div>
+                        </div>
+                        <input type="text" id="input-f1-uri" oninput="updateConfig('f1U', this.value)" class="w-full text-xs p-2 border border-slate-300 rounded font-mono bg-white text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...">
+                    </div>
+                    <div class="p-3 bg-slate-50 border border-slate-300 rounded-xl">
+                        <div class="text-[11px] font-bold text-slate-700 mb-2">按鈕 2 (Primary)</div>
+                        <div class="flex gap-2 mb-2">
+                            <input type="text" id="input-f2-label" oninput="updateConfig('f2L', this.value)" class="flex-1 text-xs p-2 border border-slate-300 rounded bg-white focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="名稱">
+                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2 py-1 w-28">
+                                <input type="color" id="input-f2-color" onchange="updateConfig('f2C', this.value)" class="w-5 h-5 rounded cursor-pointer border-none shadow-sm">
+                                <input type="text" id="text-f2-color" oninput="updateConfig('f2C', this.value)" class="flex-1 text-[10px] font-mono text-slate-600 outline-none uppercase text-center">
+                            </div>
+                        </div>
+                        <input type="text" id="input-f2-uri" oninput="updateConfig('f2U', this.value)" class="w-full text-xs p-2 border border-slate-300 rounded font-mono bg-white text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...">
+                    </div>
+                </div>
             </div>
+
+        </aside>
+
+        <!-- 右側預覽區 -->
+        <main class="flex-1 bg-slate-100 relative overflow-hidden flex flex-col">
             
-            <div class="device-frame">
-                <div class="device-header"></div>
-                <div class="device-screen">
-                    <div id="flex-render-mount" class="flex flex-col gap-5 pb-10"></div>
+            <!-- 聊天室模擬容器 -->
+            <div class="chat-room-bg custom-scrollbar">
+                
+                <!-- 模擬日期標籤 -->
+                <div class="text-center my-4">
+                    <span class="bg-black/20 text-white text-[10px] px-2 py-1 rounded-full backdrop-blur-sm">Today</span>
                 </div>
+
+                <!-- Flex 氣泡本體 -->
+                <div class="flex items-start gap-2 mb-8 w-full justify-center">
+                    <!-- 頭像 -->
+                    <div class="w-8 h-8 rounded-full bg-slate-400 shrink-0 self-start mt-1"></div>
+                    
+                    <!-- 氣泡內容 -->
+                    <div class="bg-white rounded-xl overflow-hidden flex-bubble-container flex flex-col">
+                        
+                        <!-- Hero Area -->
+                        <div id="view-hero-container" class="relative w-full bg-black overflow-hidden group cursor-pointer shrink-0">
+                            <img id="view-hero-img" src="" class="w-full h-full object-cover hidden">
+                            <div id="view-video-ui" class="absolute inset-0 flex items-center justify-center hidden">
+                                <img id="view-video-poster" src="" class="absolute inset-0 w-full h-full object-cover opacity-70">
+                                <div class="relative z-10 w-12 h-12 bg-white/90 rounded-full flex items-center justify-center shadow-lg">
+                                    <i data-lucide="play" class="w-5 h-5 text-slate-900 fill-slate-900 ml-1"></i>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Body Area -->
+                        <div class="relative w-full" id="view-body-container">
+                            <!-- 背景圖 (絕對定位) -->
+                            <img id="view-body-bg" src="" class="absolute inset-0 w-full h-full object-cover z-0 hidden">
+                            
+                            <!-- 內容網格 -->
+                            <div class="relative z-10 p-4">
+                                <div class="grid gap-2" id="view-grid">
+                                    <!-- Items -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Footer Area -->
+                        <div class="p-3 border-t border-slate-100 flex flex-col gap-2 shrink-0 relative z-10" id="view-footer">
+                            <div id="view-footer-text" class="text-xs whitespace-pre-wrap mb-1 hidden w-full"></div>
+                            <div class="flex gap-2 w-full">
+                                <button id="view-btn-1" class="flex-1 py-2 rounded text-[10px] font-bold text-white text-center transition hover:opacity-90"></button>
+                                <button id="view-btn-2" class="flex-1 py-2 rounded text-[10px] font-bold text-white text-center transition hover:opacity-90"></button>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+                
+                <!-- 底部留白 -->
+                <div class="h-10 w-full shrink-0"></div>
             </div>
 
-            <div class="mt-8 bg-white p-4 rounded-2xl border border-slate-200 w-full max-w-[380px] shadow-sm">
-                <div class="flex justify-between items-center mb-2">
-                    <p class="text-[10px] font-black text-slate-400 uppercase flex items-center gap-1.5">
-                        <i data-lucide="link" class="w-3 h-3"></i> Current Endpoint
-                    </p>
-                    <span id="url-len-badge" class="text-[9px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-bold">0 chars</span>
-                </div>
-                <code id="debug-url" class="text-[9px] text-emerald-600 block break-all font-mono bg-slate-50 p-2 rounded-lg border border-slate-100"></code>
-                <p class="text-[9px] text-slate-300 mt-2 italic text-center">※ 請確保 LINE 後台 Endpoint 與此網址完全一致</p>
+            <div id="toast" class="fixed bottom-8 left-1/2 -translate-x-1/2 bg-slate-800 text-white px-6 py-3 rounded-full shadow-xl text-sm font-medium transform translate-y-24 opacity-0 transition-all duration-300 flex items-center gap-2 z-50">
+                <i data-lucide="check-circle-2" class="w-4 h-4 text-emerald-400"></i> JSON 已複製
             </div>
-        </section>
-    </main>
-
-    <div id="toast-notif" class="fixed bottom-10 left-1/2 -translate-x-1/2 bg-slate-900 text-white px-10 py-5 rounded-2xl shadow-2xl text-sm font-bold transform translate-y-40 opacity-0 transition-all duration-500 z-50 flex items-center gap-4 border border-white/10">
-        <i data-lucide="check-circle" class="w-6 h-6 text-emerald-400"></i>
-        <span id="toast-text"></span>
+        </main>
     </div>
 
     <script>
         lucide.createIcons();
 
-        const jsonInput = document.getElementById('json-input');
-        const renderMount = document.getElementById('flex-render-mount');
-        const liffIdInput = document.getElementById('liff-id-input');
-        const statusIndicator = document.getElementById('liff-status-indicator');
-        const userStatusText = document.getElementById('user-status-text');
-        const debugUrl = document.getElementById('debug-url');
-        const altTextInput = document.getElementById('alt-text-input');
-        const urlLenBadge = document.getElementById('url-len-badge');
+        let state = {
+            hero: {
+                type: 'video', 
+                aspectRatio: '16:9',
+                url: "https://lihi.cc/5OXMZ", 
+                videoUrl: "https://lihi.cc/YsmAp", 
+                link: "https://line.me"
+            },
+            body: {
+                columns: 3,
+                bubbleSize: "mega", 
+                bgType: "image", // color | image
+                bgMode: "cover", // cover | top
+                bgColor: "#F8F8F8", // Body 預設底色
+                bg: "https://lihi.cc/l5qqU",
+                tagBgColor: "#0D0D0D",
+                tagTextColor: "#FFFFFF",
+                items: [
+                    { title: "商品 A", img: "https://lihi.cc/mwMvo", url: "https://line.me" },
+                    { title: "商品 B", img: "https://lihi.cc/2Nu8G", url: "https://line.me" },
+                    { title: "商品 C", img: "https://lihi.cc/yRfpn", url: "https://line.me" },
+                    { title: "商品 D", img: "https://lihi.cc/yRfpn", url: "https://line.me" },
+                    { title: "商品 E", img: "https://lihi.cc/2Nu8G", url: "https://line.me" },
+                    { title: "商品 F", img: "https://lihi.cc/mwMvo", url: "https://line.me" }
+                ]
+            },
+            footer: {
+                bg: "#ffffff", 
+                textEnabled: false,
+                text: "※ 請注意：優惠商品數量有限，售完為止。",
+                textColor: "#666666",
+                textAlign: "center", // start, center, end
+                btn1: { label: "品牌故事", color: "#000000", uri: "https://liff.line.me/2008704329-cTkwlRHm" },
+                btn2: { label: "好友分享", color: "#000000", uri: "line://nv/recommendOA/@754tjssx" }
+            }
+        };
 
-        let liffReady = false;
+        let history = [];
 
-        const welcomeMessage = {
-            "type": "bubble",
-            "body": {
+        function saveState() {
+            if (history.length > 20) history.shift();
+            history.push(JSON.parse(JSON.stringify(state)));
+            document.getElementById('btn-undo').disabled = false;
+        }
+
+        function undo() {
+            if (history.length > 0) {
+                state = history.pop();
+                if (history.length === 0) document.getElementById('btn-undo').disabled = true;
+                syncUI();
+                render();
+            }
+        }
+
+        function updateHeroType(type) {
+            saveState();
+            state.hero.type = type;
+            syncUI();
+            render();
+        }
+
+        function updateBodyType(type) {
+            saveState();
+            state.body.bgType = type;
+            syncUI();
+            render();
+        }
+
+        function updateConfig(path, value) {
+            saveState();
+            if(path === 'heroAspect') state.hero.aspectRatio = value;
+            if(path === 'heroUrl') state.hero.url = value;
+            if(path === 'videoUrl') state.hero.videoUrl = value;
+            if(path === 'heroLink') state.hero.link = value;
+            
+            if(path === 'bodyBg') state.body.bg = value;
+            if(path === 'bodyBgMode') state.body.bgMode = value;
+            if(path === 'bodyColor') state.body.bgColor = value.toUpperCase(); 
+            if(path === 'tagBgColor') state.body.tagBgColor = value.toUpperCase();
+            if(path === 'tagTextColor') state.body.tagTextColor = value.toUpperCase();
+            if(path === 'columns') state.body.columns = value;
+            if(path === 'bubbleSize') state.body.bubbleSize = value; 
+            
+            if(path === 'footerBg') state.footer.bg = value.toUpperCase();
+            if(path === 'footerTextEnabled') state.footer.textEnabled = value;
+            if(path === 'footerText') state.footer.text = value;
+            if(path === 'footerTextColor') state.footer.textColor = value.toUpperCase();
+            if(path === 'footerTextAlign') state.footer.textAlign = value;
+            if(path === 'f1L') state.footer.btn1.label = value;
+            if(path === 'f1C') state.footer.btn1.color = value.toUpperCase();
+            if(path === 'f1U') state.footer.btn1.uri = value;
+            if(path === 'f2L') state.footer.btn2.label = value;
+            if(path === 'f2C') state.footer.btn2.color = value.toUpperCase();
+            if(path === 'f2U') state.footer.btn2.uri = value;
+            render();
+            
+            if (['bodyColor', 'tagBgColor', 'tagTextColor', 'footerBg', 'footerTextColor', 'f1C', 'f2C'].includes(path)) {
+                syncUI();
+            }
+            if (path === 'footerTextEnabled' || path === 'footerTextAlign') {
+                syncUI();
+            }
+        }
+
+        function updateItem(index, field, value) {
+            saveState();
+            state.body.items[index][field] = value;
+            render();
+        }
+
+        function addItem() {
+            saveState();
+            state.body.items.push({ 
+                title: "新商品", 
+                img: "https://lihi.cc/mwMvo", 
+                url: "https://line.me" 
+            });
+            syncUI();
+            render();
+        }
+
+        function deleteItem(index) {
+            saveState();
+            state.body.items.splice(index, 1);
+            syncUI();
+            render();
+        }
+
+        function syncUI() {
+            // --- Hero UI Sync ---
+            const btnImg = document.getElementById('btn-type-image');
+            const btnVid = document.getElementById('btn-type-video');
+            const btnNone = document.getElementById('btn-type-none');
+            const fieldVideo = document.getElementById('field-video-url');
+            const labelHeroUrl = document.getElementById('label-hero-url');
+            const heroSettings = document.getElementById('hero-settings-container');
+            const heroNoneMsg = document.getElementById('hero-none-msg');
+            
+            const activeClass = "flex-1 py-1.5 text-xs font-bold rounded-md transition bg-white shadow-sm text-line-green border border-line-green";
+            const inactiveClass = "flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600 hover:bg-slate-200";
+            
+            btnImg.className = inactiveClass;
+            btnVid.className = inactiveClass;
+            btnNone.className = inactiveClass;
+            
+            heroSettings.classList.remove('hidden');
+            heroNoneMsg.classList.add('hidden');
+            fieldVideo.classList.add('hidden');
+
+            if (state.hero.type === 'image') {
+                btnImg.className = activeClass;
+                labelHeroUrl.innerText = "圖片網址 (Image URL)";
+            } else if (state.hero.type === 'video') {
+                btnVid.className = activeClass;
+                fieldVideo.classList.remove('hidden');
+                labelHeroUrl.innerText = "預覽封面圖 URL (Preview)";
+            } else if (state.hero.type === 'none') {
+                btnNone.className = activeClass;
+                heroSettings.classList.add('hidden');
+                heroNoneMsg.classList.remove('hidden');
+            }
+
+            document.getElementById('hero-aspect').value = state.hero.aspectRatio;
+            document.getElementById('input-hero-url').value = state.hero.url;
+            document.getElementById('input-video-url').value = state.hero.videoUrl;
+            document.getElementById('input-hero-link').value = state.hero.link;
+            
+            // --- Body UI Sync ---
+            const btnBodyColor = document.getElementById('btn-body-type-color');
+            const btnBodyImage = document.getElementById('btn-body-type-image');
+            const bodyColorSettings = document.getElementById('body-color-settings');
+            const bodyImageSettings = document.getElementById('body-image-settings');
+
+            btnBodyColor.className = inactiveClass;
+            btnBodyImage.className = inactiveClass;
+
+            if (state.body.bgType === 'color') {
+                btnBodyColor.className = activeClass;
+                bodyColorSettings.classList.remove('hidden');
+                bodyImageSettings.classList.add('hidden');
+            } else {
+                btnBodyImage.className = activeClass;
+                bodyColorSettings.classList.add('hidden');
+                bodyImageSettings.classList.remove('hidden');
+            }
+
+            document.getElementById('input-body-bg').value = state.body.bg;
+            document.getElementById('body-bg-mode').value = state.body.bgMode;
+            
+            document.getElementById('input-body-color-simple').value = state.body.bgColor;
+            document.getElementById('text-body-color-simple').value = state.body.bgColor;
+            document.getElementById('input-body-color-img').value = state.body.bgColor;
+            document.getElementById('text-body-color-img').value = state.body.bgColor;
+
+            document.getElementById('body-columns').value = state.body.columns;
+            document.getElementById('bubble-size').value = state.body.bubbleSize; 
+
+            // Tag Colors
+            document.getElementById('input-tag-bg-color').value = state.body.tagBgColor;
+            document.getElementById('text-tag-bg-color').value = state.body.tagBgColor;
+            document.getElementById('input-tag-text-color').value = state.body.tagTextColor;
+            document.getElementById('text-tag-text-color').value = state.body.tagTextColor;
+            
+            // --- Footer UI Sync ---
+            document.getElementById('input-footer-bg').value = state.footer.bg;
+            document.getElementById('text-footer-bg').value = state.footer.bg;
+            
+            document.getElementById('input-footer-text-enabled').checked = state.footer.textEnabled;
+            document.getElementById('input-footer-text').value = state.footer.text;
+            document.getElementById('footer-text-input-area').className = state.footer.textEnabled ? "block" : "hidden";
+
+            // Footer Text Color
+            document.getElementById('input-footer-text-color').value = state.footer.textColor;
+            document.getElementById('text-footer-text-color').value = state.footer.textColor;
+
+            // Footer Text Alignment Buttons
+            const alignStart = document.getElementById('btn-align-start');
+            const alignCenter = document.getElementById('btn-align-center');
+            const alignEnd = document.getElementById('btn-align-end');
+            
+            const alignActive = "p-1 rounded bg-white shadow-sm text-line-green border border-slate-200 transition";
+            const alignInactive = "p-1 rounded hover:bg-white transition text-slate-600";
+
+            alignStart.className = alignInactive;
+            alignCenter.className = alignInactive;
+            alignEnd.className = alignInactive;
+
+            if (state.footer.textAlign === 'start') alignStart.className = alignActive;
+            else if (state.footer.textAlign === 'center') alignCenter.className = alignActive;
+            else if (state.footer.textAlign === 'end') alignEnd.className = alignActive;
+
+            document.getElementById('input-f1-label').value = state.footer.btn1.label;
+            document.getElementById('input-f1-color').value = state.footer.btn1.color;
+            document.getElementById('text-f1-color').value = state.footer.btn1.color;
+            document.getElementById('input-f1-uri').value = state.footer.btn1.uri;
+            
+            document.getElementById('input-f2-label').value = state.footer.btn2.label;
+            document.getElementById('input-f2-color').value = state.footer.btn2.color;
+            document.getElementById('text-f2-color').value = state.footer.btn2.color;
+            document.getElementById('input-f2-uri').value = state.footer.btn2.uri;
+
+            document.getElementById('item-count-badge').innerText = `${state.body.items.length} items`;
+
+            // Items List
+            const container = document.getElementById('items-container');
+            container.innerHTML = '';
+            state.body.items.forEach((item, i) => {
+                const div = document.createElement('div');
+                div.className = "p-3 bg-slate-50 border border-slate-300 rounded-xl space-y-2 relative group shadow-sm";
+                div.innerHTML = `
+                    <button onclick="deleteItem(${i})" class="absolute top-2 right-2 text-slate-400 hover:text-red-600 transition">
+                        <i data-lucide="trash-2" class="w-4 h-4"></i>
+                    </button>
+                    <div class="flex items-center gap-3">
+                        <img src="${item.img}" class="w-10 h-10 rounded-md object-cover border border-slate-300 bg-white">
+                        <div class="flex-1 grid grid-cols-1 gap-2 mr-6">
+                            <label class="text-[10px] text-slate-500 font-bold block mb-0.5">標籤文字</label>
+                            <input type="text" value="${item.title}" oninput="updateItem(${i}, 'title', this.value)" class="text-xs p-1.5 bg-white border border-slate-300 rounded font-bold text-slate-800 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="標籤文字">
+                        </div>
+                    </div>
+                    <div class="flex gap-2">
+                        <div class="flex-1">
+                            <label class="text-[10px] text-slate-500 font-bold block mb-0.5">圖片連結 (Image URL)</label>
+                            <input type="text" value="${item.img}" oninput="updateItem(${i}, 'img', this.value)" class="w-full text-[10px] p-1.5 bg-white border border-slate-300 rounded font-mono text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="圖片 URL">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-500 font-bold block mb-0.5">點擊連結 (Action URL)</label>
+                        <input type="text" value="${item.url}" oninput="updateItem(${i}, 'url', this.value)" class="w-full text-[10px] p-1.5 bg-white border border-slate-300 rounded font-mono text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...">
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+            lucide.createIcons(); 
+        }
+
+        function render() {
+            // Hero
+            const heroContainer = document.getElementById('view-hero-container');
+            const heroImg = document.getElementById('view-hero-img');
+            const videoUi = document.getElementById('view-video-ui');
+            const videoPoster = document.getElementById('view-video-poster');
+
+            const ratioMap = { '1:1': 'aspect-1-1', '16:9': 'aspect-16-9', '4:3': 'aspect-4-3', '1.91:1': 'aspect-1_91-1', '3:4': 'aspect-3-4' };
+            heroContainer.className = `relative w-full bg-black overflow-hidden group cursor-pointer shrink-0 ${ratioMap[state.hero.aspectRatio]}`;
+
+            if (state.hero.type === 'none') {
+                heroContainer.style.display = 'none';
+            } else {
+                heroContainer.style.display = 'block';
+                if (state.hero.type === 'image') {
+                    heroImg.src = state.hero.url;
+                    heroImg.classList.remove('hidden');
+                    videoUi.classList.add('hidden');
+                } else {
+                    heroImg.classList.add('hidden');
+                    videoPoster.src = state.hero.url;
+                    videoUi.classList.remove('hidden');
+                }
+            }
+
+            // Body Container Style
+            const bodyContainer = document.getElementById('view-body-container');
+            const bodyBg = document.getElementById('view-body-bg');
+            
+            bodyContainer.style.backgroundColor = state.body.bgColor;
+            
+            if (state.body.bgType === 'image') {
+                bodyBg.classList.remove('hidden');
+                bodyBg.src = state.body.bg;
+                if (state.body.bgMode === 'top') {
+                    // Top Align Mode
+                    bodyBg.style.height = 'auto';
+                    bodyBg.style.objectFit = 'contain';
+                    bodyBg.style.top = '0';
+                    bodyBg.style.bottom = 'auto';
+                } else {
+                    // Cover Mode
+                    bodyBg.style.height = '100%';
+                    bodyBg.style.objectFit = 'cover';
+                    bodyBg.style.bottom = '0';
+                }
+            } else {
+                // Color Mode
+                bodyBg.classList.add('hidden');
+            }
+
+            const grid = document.getElementById('view-grid');
+            grid.className = "grid gap-2 " + (state.body.columns === 3 ? "grid-cols-3" : "grid-cols-4");
+            
+            grid.innerHTML = '';
+            state.body.items.forEach(item => {
+                const el = document.createElement('div');
+                el.className = "bg-white rounded-md p-1 shadow-sm flex flex-col";
+                el.innerHTML = `
+                    <div class="relative w-full aspect-square bg-slate-100 rounded-sm overflow-hidden mb-1">
+                        <img src="${item.img}" class="w-full h-full object-cover">
+                    </div>
+                    <div style="background-color: ${state.body.tagBgColor}; color: ${state.body.tagTextColor};" class="text-[8px] font-bold text-center py-1 px-1 rounded-sm truncate">
+                        ${item.title}
+                    </div>
+                `;
+                grid.appendChild(el);
+            });
+
+            // Footer
+            const footer = document.getElementById('view-footer');
+            footer.style.backgroundColor = state.footer.bg;
+
+            const footerText = document.getElementById('view-footer-text');
+            if (state.footer.textEnabled) {
+                footerText.classList.remove('hidden');
+                footerText.innerText = state.footer.text;
+                footerText.style.color = state.footer.textColor; // Apply Text Color
+                // Map alignment values
+                const alignClass = state.footer.textAlign === 'center' ? 'text-center' : (state.footer.textAlign === 'end' ? 'text-right' : 'text-left');
+                footerText.className = `text-xs whitespace-pre-wrap mb-2 w-full ${alignClass}`;
+            } else {
+                footerText.classList.add('hidden');
+            }
+
+            const btn1 = document.getElementById('view-btn-1');
+            btn1.innerText = state.footer.btn1.label;
+            btn1.style.backgroundColor = state.footer.btn1.color;
+
+            const btn2 = document.getElementById('view-btn-2');
+            btn2.innerText = state.footer.btn2.label;
+            btn2.style.backgroundColor = state.footer.btn2.color;
+        }
+
+        function generateFlexJSON() {
+            const cols = state.body.columns;
+            const width = cols === 3 ? "32%" : "23%";
+            const chunk = (arr, size) => Array.from({ length: Math.ceil(arr.length / size) }, (v, i) => arr.slice(i * size, i * size + size));
+            
+            // 基礎 Body 設定
+            const bodyConfig = {
                 "type": "box",
                 "layout": "vertical",
-                "contents": [
-                    { "type": "text", "text": "Flex Sender v2.0", "weight": "bold", "size": "xl", "color": "#111111" },
-                    { "type": "text", "text": "正式版部署成功！現在您可以編輯左側 JSON，系統將自動套用 LZ 壓縮技術製作超短分享連結。", "size": "sm", "color": "#666666", "margin": "md", "wrap": true }
-                ]
+                "backgroundColor": state.body.bgColor, // 所有模式都有底色
+                "paddingAll": "none",
+                "contents": []
+            };
+
+            // 構建內部結構 (根據是否是 Image 模式)
+            const productContent = {
+                "type": "box",
+                "layout": "vertical",
+                "contents": chunk(state.body.items, cols).map((row, idx) => ({
+                    "type": "box",
+                    "layout": "horizontal",
+                    "margin": idx === 0 ? "none" : "md",
+                    "contents": row.map((item, colIdx) => ({
+                        "type": "box",
+                        "layout": "vertical",
+                        "contents": [
+                            {
+                                "type": "image",
+                                "url": item.img,
+                                "aspectRatio": "1:1",
+                                "size": "full",
+                                "aspectMode": "cover"
+                            },
+                            {
+                                "type": "box",
+                                "layout": "vertical",
+                                "contents": [
+                                    {
+                                        "type": "text",
+                                        "text": item.title,
+                                        "size": "xxs",
+                                        "color": state.body.tagTextColor,
+                                        "align": "center",
+                                        "weight": "bold",
+                                        "wrap": true
+                                    }
+                                ],
+                                "backgroundColor": state.body.tagBgColor,
+                                "cornerRadius": "sm",
+                                "paddingAll": "xs",
+                                "margin": "sm"
+                            }
+                        ],
+                        "paddingAll": "xs",
+                        "backgroundColor": "#FFFFFF",
+                        "cornerRadius": "md",
+                        "width": width,
+                        "action": { "type": "uri", "uri": item.url },
+                        "margin": colIdx === 0 ? "none" : "md" 
+                    }))
+                })),
+                "paddingAll": "md"
+            };
+
+            if (state.body.bgType === 'image') {
+                // Image 模式：Stack 結構 (Layer 1: Img, Layer 2: Content)
+                const bgImageProps = state.body.bgMode === 'top' 
+                    ? { "width": "100%", "aspectMode": "width", "align": "start", "offsetTop": "0px" } 
+                    : { "size": "full", "aspectMode": "cover" };
+
+                bodyConfig.contents.push({
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "image",
+                            "url": state.body.bg,
+                            "position": "absolute",
+                            ...bgImageProps
+                        },
+                        productContent
+                    ]
+                });
+            } else {
+                // Color 模式：直接放入內容，不使用 Stack
+                bodyConfig.contents.push(productContent);
             }
-        };
+
+            const footerContents = [];
+            
+            // Add optional footer text
+            if (state.footer.textEnabled) {
+                footerContents.push({
+                    "type": "text",
+                    "text": state.footer.text,
+                    "wrap": true,
+                    "size": "xs",
+                    "color": state.footer.textColor, // Apply Text Color
+                    "align": state.footer.textAlign,
+                    "margin": "md"
+                });
+            }
+
+            // Add buttons container
+            footerContents.push({
+                "type": "box",
+                "layout": "horizontal",
+                "spacing": "md",
+                "contents": [
+                    {
+                        "type": "button",
+                        "style": "primary",
+                        "height": "sm",
+                        "action": { "type": "uri", "label": state.footer.btn1.label, "uri": state.footer.btn1.uri },
+                        "color": state.footer.btn1.color
+                    },
+                    {
+                        "type": "button",
+                        "style": "primary",
+                        "height": "sm",
+                        "action": { "type": "uri", "label": state.footer.btn2.label, "uri": state.footer.btn2.uri },
+                        "color": state.footer.btn2.color
+                    }
+                ]
+            });
+
+            const flex = {
+                "type": "bubble",
+                "size": state.body.bubbleSize,
+                "body": bodyConfig,
+                "footer": {
+                    "type": "box",
+                    "layout": "vertical", // Changed to vertical to stack text and buttons
+                    "spacing": "sm",
+                    "backgroundColor": state.footer.bg,
+                    "contents": footerContents,
+                    "paddingTop": "md"
+                }
+            };
+
+            // 只有在非 'none' 時才加入 hero 區塊
+            if (state.hero.type !== 'none') {
+                flex.hero = state.hero.type === 'video' ? {
+                    "type": "video",
+                    "url": state.hero.videoUrl,
+                    "previewUrl": state.hero.url,
+                    "altContent": {
+                        "type": "image",
+                        "size": "full",
+                        "aspectRatio": state.hero.aspectRatio,
+                        "aspectMode": "cover",
+                        "url": state.hero.url,
+                        "backgroundColor": "#000000"
+                    },
+                    "aspectRatio": state.hero.aspectRatio
+                } : {
+                    "type": "image",
+                    "url": state.hero.url,
+                    "size": "full",
+                    "aspectRatio": state.hero.aspectRatio,
+                    "aspectMode": "cover",
+                    "action": { "type": "uri", "uri": state.hero.link }
+                };
+            }
+
+            return flex;
+        }
+
+        function exportJSON() {
+            const json = JSON.stringify(generateFlexJSON(), null, 2);
+            const el = document.createElement('textarea');
+            el.value = json;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            
+            const toast = document.getElementById('toast');
+            toast.classList.remove('translate-y-24', 'opacity-0');
+            setTimeout(() => toast.classList.add('translate-y-24', 'opacity-0'), 2500);
+        }
 
         window.onload = () => {
-            const currentBaseUrl = window.location.href.split('?')[0];
-            debugUrl.innerText = currentBaseUrl;
-
-            const urlParams = new URLSearchParams(window.location.search);
-            const compressedJson = urlParams.get('msg');
-            const liffIdParam = urlParams.get('liffId');
-            
-            if (compressedJson) {
-                try {
-                    const decompressed = LZString.decompressFromEncodedURIComponent(compressedJson);
-                    if (decompressed) {
-                        jsonInput.value = JSON.stringify(JSON.parse(decompressed), null, 4);
-                    } else {
-                        const decoded = decodeURIComponent(escape(atob(compressedJson)));
-                        jsonInput.value = JSON.stringify(JSON.parse(decoded), null, 4);
-                    }
-                } catch (e) {
-                    jsonInput.value = JSON.stringify(welcomeMessage, null, 4);
-                }
-            } else {
-                jsonInput.value = JSON.stringify(welcomeMessage, null, 4);
-            }
-
-            if (liffIdParam) {
-                liffIdInput.value = liffIdParam;
-                initLIFF(liffIdParam);
-            } else {
-                const savedId = localStorage.getItem('liff_id_v2.0');
-                if (savedId) {
-                    liffIdInput.value = savedId;
-                    initLIFF(savedId);
-                }
-            }
-            updateLivePreview();
+            saveState();
+            syncUI();
+            render();
         };
-
-        async function initLIFF(id) {
-            try {
-                await liff.init({ liffId: id });
-                liffReady = true;
-                syncAuthStatus();
-                showToast("LIFF 連線已成功對接");
-            } catch (err) {
-                liffReady = false;
-                showToast("連線失敗：請檢查 ID 與網址");
-            }
-        }
-
-        function syncAuthStatus() {
-            if (liff.isLoggedIn()) {
-                statusIndicator.className = "status-dot status-online";
-                liff.getProfile().then(p => {
-                    userStatusText.innerText = `Online: ${p.displayName}`;
-                });
-                document.getElementById('btn-login-trigger').classList.add('hidden');
-            } else {
-                statusIndicator.className = "status-dot status-offline";
-                userStatusText.innerText = "System Standby";
-                document.getElementById('btn-login-trigger').classList.remove('hidden');
-            }
-        }
-
-        liffIdInput.addEventListener('blur', () => {
-            const id = liffIdInput.value.trim();
-            if (id) {
-                localStorage.setItem('liff_id_v2.0', id);
-                initLIFF(id);
-            }
-        });
-
-        function generateShareUrl() {
-            const jsonStr = jsonInput.value.trim();
-            const liffId = liffIdInput.value.trim();
-            try {
-                const obj = JSON.parse(jsonStr);
-                const compressed = LZString.compressToEncodedURIComponent(JSON.stringify(obj));
-                const currentBaseUrl = window.location.href.split('?')[0];
-                let shareUrl = `${currentBaseUrl}?msg=${compressed}`;
-                if (liffId) shareUrl += `&liffId=${liffId}`;
-                
-                const el = document.createElement('textarea');
-                el.style.position = 'fixed'; el.style.opacity = 0;
-                el.value = shareUrl;
-                document.body.appendChild(el);
-                el.select();
-                document.execCommand('copy');
-                document.body.removeChild(el);
-                showToast(`極短連結已成功製作並複製！`);
-            } catch (e) {
-                showToast("JSON 語法錯誤");
-            }
-        }
-
-        function updateLivePreview() {
-            try {
-                let data = JSON.parse(jsonInput.value.trim());
-                if (data.contents) data = data.contents;
-                renderMount.innerHTML = "";
-                if (data.type === "carousel") {
-                    const scrollBox = document.createElement('div');
-                    scrollBox.style.display = "flex";
-                    scrollBox.style.gap = "15px";
-                    scrollBox.style.overflowX = "auto";
-                    scrollBox.style.paddingBottom = "15px";
-                    data.contents.forEach(b => scrollBox.appendChild(createFlexBubble(b)));
-                    renderMount.appendChild(scrollBox);
-                } else {
-                    renderMount.appendChild(createFlexBubble(data));
-                }
-            } catch (e) {}
-        }
-
-        function createFlexBubble(json) {
-            const bubble = document.createElement('div');
-            bubble.className = "flex-bubble-card";
-            bubble.style.width = json.size === "micro" ? "180px" : (json.size === "nano" ? "140px" : "320px");
-            bubble.style.flexShrink = "0";
-            if (json.hero) bubble.appendChild(renderFlexComp(json.hero));
-            if (json.body) bubble.appendChild(renderFlexComp(json.body));
-            if (json.footer) bubble.appendChild(renderFlexComp(json.footer));
-            return bubble;
-        }
-
-        function renderFlexComp(comp) {
-            if (!comp) return document.createElement('div');
-            let el;
-            switch(comp.type) {
-                case 'box':
-                    el = document.createElement('div');
-                    el.style.display = "flex";
-                    el.style.flexDirection = comp.layout === 'horizontal' ? 'row' : 'column';
-                    if (comp.paddingAll) el.style.padding = "16px";
-                    if (comp.backgroundColor) el.style.backgroundColor = comp.backgroundColor;
-                    if (comp.spacing) el.style.gap = "10px";
-                    comp.contents?.forEach(c => el.appendChild(renderFlexComp(c)));
-                    break;
-                case 'text':
-                    el = document.createElement('div');
-                    el.innerText = comp.text;
-                    el.style.fontSize = comp.size === 'xl' ? '24px' : (comp.size === 'xs' ? '12px' : '15px');
-                    el.style.fontWeight = comp.weight === 'bold' ? '900' : '400';
-                    el.style.color = comp.color || '#333';
-                    if (comp.align === 'center') el.style.textAlign = 'center';
-                    if (comp.margin) el.style.marginTop = "8px";
-                    if (comp.wrap) el.style.wordBreak = "break-all";
-                    break;
-                case 'image':
-                    el = document.createElement('img');
-                    el.src = comp.url;
-                    el.style.width = "100%";
-                    el.style.display = "block";
-                    el.style.objectFit = comp.aspectMode || "cover";
-                    if (comp.aspectRatio) el.style.aspectRatio = comp.aspectRatio.replace(':', '/');
-                    break;
-                case 'button':
-                    el = document.createElement('div');
-                    el.innerText = comp.action?.label || '按鈕';
-                    el.style.textAlign = "center";
-                    el.style.padding = "12px";
-                    el.style.margin = "5px";
-                    el.style.borderRadius = "12px";
-                    el.style.fontSize = "14px";
-                    el.style.fontWeight = "900";
-                    if (comp.style === 'primary') {
-                        el.style.background = comp.color || "#06C755";
-                        el.style.color = "white";
-                    } else {
-                        el.style.border = "1px solid #e5e7eb";
-                        el.style.color = "#4b5563";
-                    }
-                    break;
-                default:
-                    el = document.createElement('div');
-            }
-            return el;
-        }
-
-        async function sendFlexMessage() {
-            if (!liffReady) return showToast("請確認 LIFF 初始化成功");
-            if (!liff.isLoggedIn()) return liff.login();
-            try {
-                let flex = JSON.parse(jsonInput.value.trim());
-                if (flex.contents) flex = flex.contents;
-                if (Array.isArray(flex)) flex = { "type": "carousel", "contents": flex };
-                const res = await liff.shareTargetPicker([
-                    { "type": "flex", "altText": altTextInput.value, "contents": flex }
-                ]);
-                if (res) showToast("🎉 訊息已成功發送！");
-            } catch (err) {
-                showToast("發送內容不符規範");
-            }
-        }
-
-        function formatCode() {
-            try {
-                const obj = JSON.parse(jsonInput.value);
-                jsonInput.value = JSON.stringify(obj, null, 4);
-                updateLivePreview();
-            } catch (e) { showToast("語法錯誤"); }
-        }
-
-        function clearAll() {
-            jsonInput.value = "";
-            renderMount.innerHTML = '<div class="text-center text-slate-400 text-sm mt-20 italic">等待輸入 JSON...</div>';
-            showToast("編輯器已清空");
-        }
-
-        function showToast(msg) {
-            const t = document.getElementById('toast-notif');
-            document.getElementById('toast-text').innerText = msg;
-            t.classList.remove('translate-y-40', 'opacity-0');
-            setTimeout(() => t.classList.add('translate-y-40', 'opacity-0'), 3000);
-        }
-
-        jsonInput.addEventListener('input', () => {
-            updateLivePreview();
-            const len = jsonInput.value.length;
-            urlLenBadge.innerText = `${len} chars`;
-            urlLenBadge.className = `text-[9px] px-2 py-0.5 rounded font-bold ${len > 3000 ? 'bg-red-100 text-red-500' : 'bg-slate-100 text-slate-500'}`;
-        });
     </script>
 </body>
 </html>
