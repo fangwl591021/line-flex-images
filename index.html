@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LINE Flex Message Editor</title>
+    <title>個人電商版 LINE Flex Message Editor</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     <!-- Lucide Icons -->
@@ -51,46 +51,46 @@
 <body class="h-screen flex flex-col overflow-hidden text-slate-900">
 
     <!-- Header -->
-    <header class="h-14 bg-white border-b border-slate-300 flex items-center justify-between px-6 z-20 flex-shrink-0 shadow-sm">
+    <header class="h-16 bg-white border-b border-slate-300 flex items-center justify-between px-6 z-20 flex-shrink-0 shadow-sm">
         <div class="flex items-center gap-3">
-            <div class="bg-line-green p-1.5 rounded-lg text-white">
-                <i data-lucide="layout-grid" class="w-5 h-5"></i>
+            <div class="bg-line-green p-2 rounded-lg text-white">
+                <i data-lucide="layout-grid" class="w-6 h-6"></i>
             </div>
             <div>
-                <h1 class="font-bold text-base text-slate-800">Flex 產生器 (GitHub 版)</h1>
+                <h1 class="font-bold text-xl text-slate-800">個人電商版 Flex 產生器</h1>
             </div>
         </div>
         <div class="flex gap-2">
-            <button onclick="undo()" id="btn-undo" class="px-3 py-1.5 text-xs font-bold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-100 transition disabled:opacity-50 flex items-center gap-1">
-                <i data-lucide="rotate-ccw" class="w-3 h-3"></i> 復原
+            <button onclick="undo()" id="btn-undo" class="px-4 py-2 text-sm font-bold text-slate-600 border border-slate-300 rounded-lg hover:bg-slate-100 transition disabled:opacity-50 flex items-center gap-1">
+                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> 復原
             </button>
-            <button onclick="exportJSON()" class="px-3 py-1.5 text-xs font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition shadow-lg flex items-center gap-2">
-                <i data-lucide="copy" class="w-3 h-3"></i> 複製 JSON
+            <button onclick="exportJSON()" class="px-4 py-2 text-sm font-bold text-white bg-slate-900 rounded-lg hover:bg-slate-800 transition shadow-lg flex items-center gap-2">
+                <i data-lucide="copy" class="w-4 h-4"></i> 複製 JSON
             </button>
         </div>
     </header>
 
     <div class="flex-1 flex overflow-hidden">
         
-        <!-- 左側編輯區 -->
-        <aside class="w-full md:w-[450px] bg-white border-r border-slate-300 overflow-y-auto p-5 space-y-6 custom-scrollbar z-10 flex-shrink-0">
+        <!-- 左側編輯區 (寬度加大) -->
+        <aside class="w-full md:w-[550px] bg-white border-r border-slate-300 overflow-y-auto p-6 space-y-8 custom-scrollbar z-10 flex-shrink-0">
             
             <!-- Hero 設定 -->
             <div class="border-2 border-line-green rounded-xl bg-white overflow-hidden shadow-sm">
-                <div class="p-3 bg-line-green border-b border-line-green flex items-center gap-2 font-bold text-white text-sm">
-                    <i data-lucide="image" class="w-4 h-4 text-white"></i> 頂部 Hero 視覺
+                <div class="p-4 bg-line-green border-b border-line-green flex items-center gap-2 font-bold text-white text-lg">
+                    <i data-lucide="image" class="w-5 h-5 text-white"></i> 頂部 Hero 視覺
                 </div>
-                <div class="p-4 space-y-4">
-                    <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-300">
-                        <button onclick="updateHeroType('image')" id="btn-type-image" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">靜態圖片</button>
-                        <button onclick="updateHeroType('video')" id="btn-type-video" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">影片播放</button>
-                        <button onclick="updateHeroType('none')" id="btn-type-none" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">無</button>
+                <div class="p-5 space-y-5">
+                    <div class="flex bg-slate-100 p-1.5 rounded-lg border border-slate-300">
+                        <button onclick="updateHeroType('image')" id="btn-type-image" class="flex-1 py-2 text-sm font-bold rounded-md transition text-slate-600">靜態圖片</button>
+                        <button onclick="updateHeroType('video')" id="btn-type-video" class="flex-1 py-2 text-sm font-bold rounded-md transition text-slate-600">影片播放</button>
+                        <button onclick="updateHeroType('none')" id="btn-type-none" class="flex-1 py-2 text-sm font-bold rounded-md transition text-slate-600">無</button>
                     </div>
 
                     <div id="hero-settings-container">
-                        <div class="mb-4">
-                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">顯示比例</label>
-                            <select id="hero-aspect" onchange="updateConfig('heroAspect', this.value)" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-line-green outline-none">
+                        <div class="mb-5">
+                            <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">顯示比例</label>
+                            <select id="hero-aspect" onchange="updateConfig('heroAspect', this.value)" class="w-full text-sm p-3 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-2 focus:ring-line-green outline-none">
                                 <option value="16:9">16:9 (寬螢幕)</option>
                                 <option value="1:1">1:1 (正方形)</option>
                                 <option value="4:3">4:3 (矩形)</option>
@@ -99,32 +99,32 @@
                             </select>
                         </div>
 
-                        <div id="hero-inputs" class="space-y-4">
+                        <div id="hero-inputs" class="space-y-5">
                             <div id="field-hero-url">
-                                <label class="block mb-1">
-                                    <span class="text-[11px] font-bold text-slate-700 uppercase block" id="label-hero-url">圖片網址 (Image URL)</span>
-                                    <span class="text-[10px] text-slate-400 font-normal">※ 請輸入 .jpg 或 .png 結尾的公開連結</span>
+                                <label class="block mb-1.5">
+                                    <span class="text-sm font-bold text-slate-700 uppercase block" id="label-hero-url">圖片網址 (Image URL)</span>
+                                    <span class="text-xs text-blue-600 font-medium">※ 請輸入 .jpg 或 .png 結尾的公開連結</span>
                                 </label>
-                                <input type="text" id="input-hero-url" oninput="updateConfig('heroUrl', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none">
+                                <input type="text" id="input-hero-url" oninput="updateConfig('heroUrl', this.value)" class="w-full text-sm p-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none">
                             </div>
                             <div id="field-video-url" class="hidden">
-                                <label class="block mb-1">
-                                    <span class="text-[11px] font-bold text-slate-700 uppercase block">影片網址 (Video URL)</span>
-                                    <span class="text-[10px] text-slate-400 font-normal">※ 請輸入 .mp4 結尾的影片連結</span>
+                                <label class="block mb-1.5">
+                                    <span class="text-sm font-bold text-slate-700 uppercase block">影片網址 (Video URL)</span>
+                                    <span class="text-xs text-blue-600 font-medium">※ 請輸入 .mp4 結尾的影片連結</span>
                                 </label>
-                                <input type="text" id="input-video-url" oninput="updateConfig('videoUrl', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...mp4">
+                                <input type="text" id="input-video-url" oninput="updateConfig('videoUrl', this.value)" class="w-full text-sm p-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...mp4">
                             </div>
                             <div id="field-hero-link">
-                                <label class="block mb-1">
-                                    <span class="text-[11px] font-bold text-slate-700 uppercase block">點擊連結 (Action URL)</span>
-                                    <span class="text-[10px] text-slate-400 font-normal">※ 點擊圖片或影片後跳轉的網址</span>
+                                <label class="block mb-1.5">
+                                    <span class="text-sm font-bold text-slate-700 uppercase block">點擊連結 (Action URL)</span>
+                                    <span class="text-xs text-blue-600 font-medium">※ 點擊圖片或影片後跳轉的網址</span>
                                 </label>
-                                <input type="text" id="input-hero-link" oninput="updateConfig('heroLink', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none">
+                                <input type="text" id="input-hero-link" oninput="updateConfig('heroLink', this.value)" class="w-full text-sm p-3 bg-white border border-slate-300 rounded-lg text-slate-800 placeholder-slate-400 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none">
                             </div>
                         </div>
                     </div>
                     
-                    <div id="hero-none-msg" class="hidden text-center py-4 text-xs text-slate-400 bg-slate-50 rounded-lg border border-dashed border-slate-300">
+                    <div id="hero-none-msg" class="hidden text-center py-6 text-sm text-slate-500 bg-slate-50 rounded-lg border border-dashed border-slate-300 font-bold">
                         已隱藏 Hero 區塊
                     </div>
                 </div>
@@ -132,25 +132,25 @@
 
             <!-- Body 設定 -->
             <div class="border-2 border-line-green rounded-xl bg-white overflow-hidden shadow-sm">
-                <div class="p-3 bg-line-green border-b border-line-green flex items-center justify-between font-bold text-white text-sm">
+                <div class="p-4 bg-line-green border-b border-line-green flex items-center justify-between font-bold text-white text-lg">
                     <div class="flex items-center gap-2">
-                        <i data-lucide="palette" class="w-4 h-4 text-white"></i> Body 內容與尺寸
+                        <i data-lucide="palette" class="w-5 h-5 text-white"></i> Body 內容與尺寸
                     </div>
-                    <span class="text-[10px] bg-white/20 px-2 py-0.5 rounded text-white font-mono" id="item-count-badge">0 items</span>
+                    <span class="text-xs bg-white/20 px-3 py-1 rounded-full text-white font-mono" id="item-count-badge">0 items</span>
                 </div>
-                <div class="p-4 space-y-4">
+                <div class="p-5 space-y-5">
                     <!-- 尺寸與欄位 -->
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">卡片尺寸 (Size)</label>
-                            <select id="bubble-size" onchange="updateConfig('bubbleSize', this.value)" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-1 focus:ring-line-green outline-none">
+                            <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">卡片尺寸 (Size)</label>
+                            <select id="bubble-size" onchange="updateConfig('bubbleSize', this.value)" class="w-full text-sm p-3 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-1 focus:ring-line-green outline-none">
                                 <option value="mega">MEGA (標準)</option>
                                 <option value="giga">GIGA (寬版)</option>
                             </select>
                         </div>
                         <div>
-                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">每行欄數</label>
-                            <select id="body-columns" onchange="updateConfig('columns', parseInt(this.value))" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-1 focus:ring-line-green outline-none">
+                            <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">每行欄數</label>
+                            <select id="body-columns" onchange="updateConfig('columns', parseInt(this.value))" class="w-full text-sm p-3 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-1 focus:ring-line-green outline-none">
                                 <option value="3">3 欄位</option>
                                 <option value="4">4 欄位</option>
                             </select>
@@ -158,147 +158,147 @@
                     </div>
 
                     <!-- 標籤顏色設定 -->
-                    <div class="grid grid-cols-2 gap-3">
+                    <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">標籤背景色</label>
-                            <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
-                                <input type="color" id="input-tag-bg-color" onchange="updateConfig('tagBgColor', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
-                                <input type="text" id="text-tag-bg-color" oninput="updateConfig('tagBgColor', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#0D0D0D">
+                            <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">標籤背景色</label>
+                            <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[46px]">
+                                <input type="color" id="input-tag-bg-color" onchange="updateConfig('tagBgColor', this.value)" class="w-8 h-8 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                                <input type="text" id="text-tag-bg-color" oninput="updateConfig('tagBgColor', this.value)" class="flex-1 bg-transparent text-sm font-mono text-slate-700 outline-none uppercase" value="#0D0D0D">
                             </div>
                         </div>
                         <div>
-                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">標籤文字色</label>
-                            <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
-                                <input type="color" id="input-tag-text-color" onchange="updateConfig('tagTextColor', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
-                                <input type="text" id="text-tag-text-color" oninput="updateConfig('tagTextColor', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#FFFFFF">
+                            <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">標籤文字色</label>
+                            <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[46px]">
+                                <input type="color" id="input-tag-text-color" onchange="updateConfig('tagTextColor', this.value)" class="w-8 h-8 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                                <input type="text" id="text-tag-text-color" oninput="updateConfig('tagTextColor', this.value)" class="flex-1 bg-transparent text-sm font-mono text-slate-700 outline-none uppercase" value="#FFFFFF">
                             </div>
                         </div>
                     </div>
 
                     <!-- 背景類型切換 -->
                     <div>
-                        <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">背景類型</label>
-                        <div class="flex bg-slate-100 p-1 rounded-lg border border-slate-300">
-                            <button onclick="updateBodyType('color')" id="btn-body-type-color" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">純色背景</button>
-                            <button onclick="updateBodyType('image')" id="btn-body-type-image" class="flex-1 py-1.5 text-xs font-bold rounded-md transition text-slate-600">圖片背景</button>
+                        <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">背景類型</label>
+                        <div class="flex bg-slate-100 p-1.5 rounded-lg border border-slate-300">
+                            <button onclick="updateBodyType('color')" id="btn-body-type-color" class="flex-1 py-2 text-sm font-bold rounded-md transition text-slate-600">純色背景</button>
+                            <button onclick="updateBodyType('image')" id="btn-body-type-image" class="flex-1 py-2 text-sm font-bold rounded-md transition text-slate-600">圖片背景</button>
                         </div>
                     </div>
                     
-                    <!-- 背景詳細設定 (根據類型切換) -->
-                    <div id="body-bg-settings" class="space-y-4">
-                        <!-- 純色模式顯示 -->
+                    <!-- 背景詳細設定 -->
+                    <div id="body-bg-settings" class="space-y-5">
+                        <!-- 純色模式 -->
                         <div id="body-color-settings">
-                            <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">背景底色</label>
-                            <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
-                                <input type="color" id="input-body-color-simple" onchange="updateConfig('bodyColor', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
-                                <input type="text" id="text-body-color-simple" oninput="updateConfig('bodyColor', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#F8F8F8">
+                            <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">背景底色</label>
+                            <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[46px]">
+                                <input type="color" id="input-body-color-simple" onchange="updateConfig('bodyColor', this.value)" class="w-8 h-8 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                                <input type="text" id="text-body-color-simple" oninput="updateConfig('bodyColor', this.value)" class="flex-1 bg-transparent text-sm font-mono text-slate-700 outline-none uppercase" value="#F8F8F8">
                             </div>
                         </div>
 
-                        <!-- 圖片模式顯示 (包含圖片+底色) -->
-                        <div id="body-image-settings" class="hidden space-y-4">
-                            <div class="grid grid-cols-2 gap-3">
+                        <!-- 圖片模式 -->
+                        <div id="body-image-settings" class="hidden space-y-5">
+                            <div class="grid grid-cols-2 gap-4">
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">圖片模式</label>
-                                    <select id="body-bg-mode" onchange="updateConfig('bodyBgMode', this.value)" class="w-full text-xs p-2.5 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-1 focus:ring-line-green outline-none">
+                                    <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">圖片模式</label>
+                                    <select id="body-bg-mode" onchange="updateConfig('bodyBgMode', this.value)" class="w-full text-sm p-3 border border-slate-300 rounded-lg bg-white text-slate-800 focus:ring-1 focus:ring-line-green outline-none">
                                         <option value="cover">全版拉伸 (Cover)</option>
                                         <option value="top">等比縮放 (Fit Width)</option>
                                     </select>
                                 </div>
                                 <div>
-                                    <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">背景底色 (補白用)</label>
-                                    <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
-                                        <input type="color" id="input-body-color-img" onchange="updateConfig('bodyColor', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
-                                        <input type="text" id="text-body-color-img" oninput="updateConfig('bodyColor', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#F8F8F8">
+                                    <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">背景底色 (補白用)</label>
+                                    <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[46px]">
+                                        <input type="color" id="input-body-color-img" onchange="updateConfig('bodyColor', this.value)" class="w-8 h-8 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                                        <input type="text" id="text-body-color-img" oninput="updateConfig('bodyColor', this.value)" class="flex-1 bg-transparent text-sm font-mono text-slate-700 outline-none uppercase" value="#F8F8F8">
                                     </div>
                                 </div>
                             </div>
                             <div>
-                                <label class="block mb-1">
-                                    <span class="text-[11px] font-bold text-slate-700 uppercase block">背景圖片網址</span>
-                                    <span class="text-[10px] text-slate-400 font-normal">※ 滿版背景圖 (Absolute Background)</span>
+                                <label class="block mb-1.5">
+                                    <span class="text-sm font-bold text-slate-700 uppercase block">背景圖片網址</span>
+                                    <span class="text-xs text-blue-600 font-medium">※ 滿版背景圖 (Absolute Background)</span>
                                 </label>
-                                <input type="text" id="input-body-bg" oninput="updateConfig('bodyBg', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none">
+                                <input type="text" id="input-body-bg" oninput="updateConfig('bodyBg', this.value)" class="w-full text-sm p-3 bg-white border border-slate-300 rounded-lg text-slate-800 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none">
                             </div>
                         </div>
                     </div>
 
-                    <div id="items-container" class="space-y-3">
+                    <div id="items-container" class="space-y-4">
                         <!-- 商品列表動態生成 -->
                     </div>
 
-                    <button onclick="addItem()" class="w-full py-2.5 border-2 border-dashed border-slate-400 rounded-xl text-slate-600 text-xs font-bold hover:border-line-green hover:text-line-green hover:bg-emerald-50 transition flex items-center justify-center gap-2">
-                        <i data-lucide="plus" class="w-4 h-4"></i> 新增商品
+                    <button onclick="addItem()" class="w-full py-3 border-2 border-dashed border-slate-400 rounded-xl text-slate-600 text-sm font-bold hover:border-line-green hover:text-line-green hover:bg-emerald-50 transition flex items-center justify-center gap-2">
+                        <i data-lucide="plus" class="w-5 h-5"></i> 新增商品
                     </button>
                 </div>
             </div>
 
             <!-- Footer 設定 -->
             <div class="border-2 border-line-green rounded-xl bg-white overflow-hidden shadow-sm">
-                <div class="p-3 bg-line-green border-b border-line-green flex items-center gap-2 font-bold text-white text-sm">
-                    <i data-lucide="mouse-pointer-click" class="w-4 h-4 text-white"></i> 底部按鈕
+                <div class="p-4 bg-line-green border-b border-line-green flex items-center gap-2 font-bold text-white text-lg">
+                    <i data-lucide="mouse-pointer-click" class="w-5 h-5 text-white"></i> 底部按鈕
                 </div>
-                <div class="p-4 space-y-4">
+                <div class="p-5 space-y-5">
                     
                     <!-- Footer 背景色 -->
                     <div>
-                        <label class="text-[11px] font-bold text-slate-600 uppercase mb-1 block">底部背景顏色</label>
-                        <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[42px]">
-                            <input type="color" id="input-footer-bg" onchange="updateConfig('footerBg', this.value)" class="w-7 h-7 rounded cursor-pointer border-none p-0 flex-shrink-0">
-                            <input type="text" id="text-footer-bg" oninput="updateConfig('footerBg', this.value)" class="flex-1 bg-transparent text-xs font-mono text-slate-700 outline-none uppercase" value="#FFFFFF">
+                        <label class="text-sm font-bold text-slate-700 uppercase mb-1.5 block">底部背景顏色</label>
+                        <div class="flex items-center gap-2 bg-white p-2 rounded-lg border border-slate-300 h-[46px]">
+                            <input type="color" id="input-footer-bg" onchange="updateConfig('footerBg', this.value)" class="w-8 h-8 rounded cursor-pointer border-none p-0 flex-shrink-0">
+                            <input type="text" id="text-footer-bg" oninput="updateConfig('footerBg', this.value)" class="flex-1 bg-transparent text-sm font-mono text-slate-700 outline-none uppercase" value="#FFFFFF">
                         </div>
                     </div>
 
                     <!-- Footer 說明文字開關 -->
                     <div class="flex items-center justify-between">
-                        <label class="text-[11px] font-bold text-slate-600 uppercase">啟用說明文字</label>
+                        <label class="text-sm font-bold text-slate-700 uppercase">啟用說明文字</label>
                         <label class="relative inline-flex items-center cursor-pointer">
                             <input type="checkbox" id="input-footer-text-enabled" class="sr-only peer" onchange="updateConfig('footerTextEnabled', this.checked)">
-                            <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-line-green"></div>
+                            <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-line-green"></div>
                         </label>
                     </div>
 
                     <div id="footer-text-input-area" class="hidden">
                         <div class="flex justify-between items-center mb-2">
-                            <label class="block text-[11px] font-bold text-slate-600 uppercase">說明內容</label>
+                            <label class="block text-sm font-bold text-slate-700 uppercase">說明內容</label>
                             <div class="flex gap-2">
                                 <!-- Text Color Picker -->
-                                <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-1 py-0.5" title="文字顏色">
-                                    <input type="color" id="input-footer-text-color" onchange="updateConfig('footerTextColor', this.value)" class="w-4 h-4 rounded cursor-pointer border-none p-0">
-                                    <input type="text" id="text-footer-text-color" oninput="updateConfig('footerTextColor', this.value)" class="w-12 text-[10px] font-mono text-slate-600 outline-none uppercase" value="#666666">
+                                <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2 py-1" title="文字顏色">
+                                    <input type="color" id="input-footer-text-color" onchange="updateConfig('footerTextColor', this.value)" class="w-5 h-5 rounded cursor-pointer border-none p-0">
+                                    <input type="text" id="text-footer-text-color" oninput="updateConfig('footerTextColor', this.value)" class="w-16 text-xs font-mono text-slate-600 outline-none uppercase" value="#666666">
                                 </div>
                                 <!-- Alignment -->
-                                <div class="flex bg-slate-200 rounded p-0.5 space-x-0.5">
-                                    <button onclick="updateConfig('footerTextAlign', 'start')" id="btn-align-start" class="p-1 rounded hover:bg-white transition text-slate-600" title="靠左"><i data-lucide="align-left" class="w-3 h-3"></i></button>
-                                    <button onclick="updateConfig('footerTextAlign', 'center')" id="btn-align-center" class="p-1 rounded hover:bg-white transition text-slate-600" title="置中"><i data-lucide="align-center" class="w-3 h-3"></i></button>
-                                    <button onclick="updateConfig('footerTextAlign', 'end')" id="btn-align-end" class="p-1 rounded hover:bg-white transition text-slate-600" title="靠右"><i data-lucide="align-right" class="w-3 h-3"></i></button>
+                                <div class="flex bg-slate-200 rounded p-1 space-x-1">
+                                    <button onclick="updateConfig('footerTextAlign', 'start')" id="btn-align-start" class="p-1.5 rounded hover:bg-white transition text-slate-600" title="靠左"><i data-lucide="align-left" class="w-4 h-4"></i></button>
+                                    <button onclick="updateConfig('footerTextAlign', 'center')" id="btn-align-center" class="p-1.5 rounded hover:bg-white transition text-slate-600" title="置中"><i data-lucide="align-center" class="w-4 h-4"></i></button>
+                                    <button onclick="updateConfig('footerTextAlign', 'end')" id="btn-align-end" class="p-1.5 rounded hover:bg-white transition text-slate-600" title="靠右"><i data-lucide="align-right" class="w-4 h-4"></i></button>
                                 </div>
                             </div>
                         </div>
-                        <textarea id="input-footer-text" rows="3" oninput="updateConfig('footerText', this.value)" class="w-full text-xs p-2.5 bg-white border border-slate-300 rounded-lg text-slate-800 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="請輸入說明文字..."></textarea>
+                        <textarea id="input-footer-text" rows="3" oninput="updateConfig('footerText', this.value)" class="w-full text-sm p-3 bg-white border border-slate-300 rounded-lg text-slate-800 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="請輸入說明文字..."></textarea>
                     </div>
 
-                    <div class="p-3 bg-slate-50 border border-slate-300 rounded-xl">
-                        <div class="text-[11px] font-bold text-slate-700 mb-2">按鈕 1 (Primary)</div>
-                        <div class="flex gap-2 mb-2">
-                            <input type="text" id="input-f1-label" oninput="updateConfig('f1L', this.value)" class="flex-1 text-xs p-2 border border-slate-300 rounded bg-white focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="名稱">
-                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2 py-1 w-28">
-                                <input type="color" id="input-f1-color" onchange="updateConfig('f1C', this.value)" class="w-5 h-5 rounded cursor-pointer border-none shadow-sm">
-                                <input type="text" id="text-f1-color" oninput="updateConfig('f1C', this.value)" class="flex-1 text-[10px] font-mono text-slate-600 outline-none uppercase text-center">
+                    <div class="p-4 bg-slate-50 border border-slate-300 rounded-xl">
+                        <div class="text-sm font-bold text-slate-700 mb-2.5">按鈕 1 (Primary)</div>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="input-f1-label" oninput="updateConfig('f1L', this.value)" class="flex-1 text-sm p-2.5 border border-slate-300 rounded bg-white focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="名稱">
+                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-3 py-1 w-32">
+                                <input type="color" id="input-f1-color" onchange="updateConfig('f1C', this.value)" class="w-6 h-6 rounded cursor-pointer border-none shadow-sm">
+                                <input type="text" id="text-f1-color" oninput="updateConfig('f1C', this.value)" class="flex-1 text-xs font-mono text-slate-600 outline-none uppercase text-center">
                             </div>
                         </div>
-                        <input type="text" id="input-f1-uri" oninput="updateConfig('f1U', this.value)" class="w-full text-xs p-2 border border-slate-300 rounded font-mono bg-white text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...">
+                        <input type="text" id="input-f1-uri" oninput="updateConfig('f1U', this.value)" class="w-full text-sm p-2.5 border border-slate-300 rounded font-mono bg-white text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...">
                     </div>
-                    <div class="p-3 bg-slate-50 border border-slate-300 rounded-xl">
-                        <div class="text-[11px] font-bold text-slate-700 mb-2">按鈕 2 (Primary)</div>
-                        <div class="flex gap-2 mb-2">
-                            <input type="text" id="input-f2-label" oninput="updateConfig('f2L', this.value)" class="flex-1 text-xs p-2 border border-slate-300 rounded bg-white focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="名稱">
-                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-2 py-1 w-28">
-                                <input type="color" id="input-f2-color" onchange="updateConfig('f2C', this.value)" class="w-5 h-5 rounded cursor-pointer border-none shadow-sm">
-                                <input type="text" id="text-f2-color" oninput="updateConfig('f2C', this.value)" class="flex-1 text-[10px] font-mono text-slate-600 outline-none uppercase text-center">
+                    <div class="p-4 bg-slate-50 border border-slate-300 rounded-xl">
+                        <div class="text-sm font-bold text-slate-700 mb-2.5">按鈕 2 (Primary)</div>
+                        <div class="flex gap-2 mb-3">
+                            <input type="text" id="input-f2-label" oninput="updateConfig('f2L', this.value)" class="flex-1 text-sm p-2.5 border border-slate-300 rounded bg-white focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="名稱">
+                            <div class="flex items-center gap-1 border border-slate-300 rounded bg-white px-3 py-1 w-32">
+                                <input type="color" id="input-f2-color" onchange="updateConfig('f2C', this.value)" class="w-6 h-6 rounded cursor-pointer border-none shadow-sm">
+                                <input type="text" id="text-f2-color" oninput="updateConfig('f2C', this.value)" class="flex-1 text-xs font-mono text-slate-600 outline-none uppercase text-center">
                             </div>
                         </div>
-                        <input type="text" id="input-f2-uri" oninput="updateConfig('f2U', this.value)" class="w-full text-xs p-2 border border-slate-300 rounded font-mono bg-white text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...">
+                        <input type="text" id="input-f2-uri" oninput="updateConfig('f2U', this.value)" class="w-full text-sm p-2.5 border border-slate-300 rounded font-mono bg-white text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...">
                     </div>
                 </div>
             </div>
@@ -621,27 +621,27 @@
             container.innerHTML = '';
             state.body.items.forEach((item, i) => {
                 const div = document.createElement('div');
-                div.className = "p-3 bg-slate-50 border border-slate-300 rounded-xl space-y-2 relative group shadow-sm";
+                div.className = "p-4 bg-slate-50 border border-slate-300 rounded-xl space-y-3 relative group shadow-sm";
                 div.innerHTML = `
-                    <button onclick="deleteItem(${i})" class="absolute top-2 right-2 text-slate-400 hover:text-red-600 transition">
+                    <button onclick="deleteItem(${i})" class="absolute top-3 right-3 text-slate-400 hover:text-red-600 transition">
                         <i data-lucide="trash-2" class="w-4 h-4"></i>
                     </button>
                     <div class="flex items-center gap-3">
-                        <img src="${item.img}" class="w-10 h-10 rounded-md object-cover border border-slate-300 bg-white">
-                        <div class="flex-1 grid grid-cols-1 gap-2 mr-6">
-                            <label class="text-[10px] text-slate-500 font-bold block mb-0.5">標籤文字</label>
-                            <input type="text" value="${item.title}" oninput="updateItem(${i}, 'title', this.value)" class="text-xs p-1.5 bg-white border border-slate-300 rounded font-bold text-slate-800 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="標籤文字">
-                        </div>
-                    </div>
-                    <div class="flex gap-2">
-                        <div class="flex-1">
-                            <label class="text-[10px] text-slate-500 font-bold block mb-0.5">圖片連結 (Image URL)</label>
-                            <input type="text" value="${item.img}" oninput="updateItem(${i}, 'img', this.value)" class="w-full text-[10px] p-1.5 bg-white border border-slate-300 rounded font-mono text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="圖片 URL">
+                        <img src="${item.img}" class="w-12 h-12 rounded-md object-cover border border-slate-300 bg-white">
+                        <div class="flex-1 grid grid-cols-1 gap-2 mr-8">
+                            <div>
+                                <label class="text-[10px] text-slate-500 font-bold block mb-0.5 uppercase">標籤文字 (Title)</label>
+                                <input type="text" value="${item.title}" oninput="updateItem(${i}, 'title', this.value)" class="w-full text-sm p-2 bg-white border border-slate-300 rounded font-bold text-slate-800 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="標籤文字">
+                            </div>
                         </div>
                     </div>
                     <div>
-                        <label class="text-[10px] text-slate-500 font-bold block mb-0.5">點擊連結 (Action URL)</label>
-                        <input type="text" value="${item.url}" oninput="updateItem(${i}, 'url', this.value)" class="w-full text-[10px] p-1.5 bg-white border border-slate-300 rounded font-mono text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...">
+                        <label class="text-[10px] text-slate-500 font-bold block mb-0.5 uppercase">圖片連結 (Image URL)</label>
+                        <input type="text" value="${item.img}" oninput="updateItem(${i}, 'img', this.value)" class="w-full text-xs p-2 bg-white border border-slate-300 rounded font-mono text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="圖片 URL">
+                    </div>
+                    <div>
+                        <label class="text-[10px] text-slate-500 font-bold block mb-0.5 uppercase">點擊連結 (Action URL)</label>
+                        <input type="text" value="${item.url}" oninput="updateItem(${i}, 'url', this.value)" class="w-full text-xs p-2 bg-white border border-slate-300 rounded font-mono text-slate-600 focus:border-line-green focus:ring-1 focus:ring-line-green outline-none" placeholder="https://...">
                     </div>
                 `;
                 container.appendChild(div);
